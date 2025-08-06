@@ -5,6 +5,7 @@ const productSchema = new mongoose.Schema(
     name: {
       type: String,
       require: true,
+      unique: true,
     },
     sku: {
       type: Number,
