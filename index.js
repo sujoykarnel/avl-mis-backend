@@ -7,6 +7,7 @@ dotenv.config();
 const PORT = process.env.PORT || 5000;
 
 // Internal Modules
+const unitRouter = require("./router/unitRouter");
 const lineRouter = require("./router/lineRouter");
 const productRouter = require("./router/productRouter");
 
@@ -24,6 +25,7 @@ mongoose
   .catch((err) => console.error("MongoDB error:", err));
 
 // Route setup
+app.use("/api/units", unitRouter);
 app.use("/api/lines", lineRouter);
 app.use("/api/products", productRouter);
 
