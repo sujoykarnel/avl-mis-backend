@@ -4,20 +4,20 @@ const productSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      require: true,
+      required: true,
       unique: true,
     },
     sku: {
       type: Number,
-      require: true,
+      required: true,
     },
     uom: {
       type: String,
-      require: true,
+      required: true,
     },
     pcsPerUom: {
       type: Number,
-      require: true,
+      required: true,
     },
     isActive: {
       type: Boolean,
@@ -25,7 +25,7 @@ const productSchema = new mongoose.Schema(
     },
     createdByEnroll: {
       type: Number,
-      require: true,
+      required: true,
     },
   },
   {

@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const UnitSchema = new mongoose.Schema(
+const InnerMachineSchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -17,10 +17,11 @@ const UnitSchema = new mongoose.Schema(
     },
   },
   {
+    collection: "innerMachines",
     timestamps: true,
   }
 );
 
-const Unit = mongoose.model("Unit", UnitSchema);
+const InnerMachine = mongoose.model("InnerMachine", InnerMachineSchema);
 
-module.exports = Unit;
+module.exports = InnerMachine;

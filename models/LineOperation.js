@@ -1,26 +1,24 @@
 const mongoose = require("mongoose");
 
-const LineOperationSchema = new mongoose.Schema(
+const OperationSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      require: true,
+      required: true,
       unique: true,
     },
     isActive: {
       type: Boolean,
-      require: true,
+      required: true,
     },
     createdByEnroll: {
       type: Number,
-      require: true,
+      required: true,
     },
   },
-  {
-    timestamps: true,
-  }
+  { collection: "lineOperations", timestamps: true }
 );
 
-const LineOperation = mongoose.model("LineOperation", LineOperationSchema);
+const Operation = mongoose.model("Operation", OperationSchema);
 
-module.exports = LineOperation;
+module.exports = Operation;

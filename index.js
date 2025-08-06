@@ -11,6 +11,10 @@ const unitRouter = require("./router/unitRouter");
 const sectionRouter = require("./router/sectionRouter");
 const lineRouter = require("./router/lineRouter");
 const productRouter = require("./router/productRouter");
+const operationRouter = require("./router/operationRouter");
+const innerMachineRouter = require("./router/innerMachineRouter");
+const downTimeReasonRouter = require("./router/downTimeReasonRouter");
+const downTimeCategoryRouter = require("./router/downTimeCategoryRouter");
 
 const app = express();
 app.use(cors());
@@ -30,6 +34,10 @@ app.use("/api/units", unitRouter);
 app.use("/api/sections", sectionRouter);
 app.use("/api/lines", lineRouter);
 app.use("/api/products", productRouter);
+app.use("/api/lineOperations", operationRouter);
+app.use("/api/innerMachines", innerMachineRouter);
+app.use("/api/downTimeReasons", downTimeReasonRouter);
+app.use("/api/downTimeCategories", downTimeCategoryRouter);
 
 // Start server
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

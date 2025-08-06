@@ -4,16 +4,16 @@ const LineSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      require: true,
+      required: true,
       unique: true,
     },
     isActive: {
       type: Boolean,
-      require: true,
+      required: true,
     },
     createdByEnroll: {
       type: Number,
-      require: true,
+      required: true,
     },
   },
   {

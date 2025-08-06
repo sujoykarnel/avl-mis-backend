@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const UnitSchema = new mongoose.Schema(
+const DownTimeCategorySchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -17,10 +17,14 @@ const UnitSchema = new mongoose.Schema(
     },
   },
   {
+    collection: "downTimeCategories",
     timestamps: true,
   }
 );
 
-const Unit = mongoose.model("Unit", UnitSchema);
+const DownTimeCategory = mongoose.model(
+  "DownTimeCategory",
+  DownTimeCategorySchema
+);
 
-module.exports = Unit;
+module.exports = DownTimeCategory;
