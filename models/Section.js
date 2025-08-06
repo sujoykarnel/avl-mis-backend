@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const LineSchema = new mongoose.Schema(
+const SectionSchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -21,6 +21,6 @@ const LineSchema = new mongoose.Schema(
   }
 );
 
-const Line = mongoose.model("Line", LineSchema);
+const Section = mongoose.model("Section", SectionSchema);
 
-module.exports = Line;
+module.exports = Section;

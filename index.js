@@ -8,6 +8,7 @@ const PORT = process.env.PORT || 5000;
 
 // Internal Modules
 const unitRouter = require("./router/unitRouter");
+const sectionRouter = require("./router/sectionRouter");
 const lineRouter = require("./router/lineRouter");
 const productRouter = require("./router/productRouter");
 
@@ -26,6 +27,7 @@ mongoose
 
 // Route setup
 app.use("/api/units", unitRouter);
+app.use("/api/sections", sectionRouter);
 app.use("/api/lines", lineRouter);
 app.use("/api/products", productRouter);
 
