@@ -4,7 +4,6 @@ const Line = require("../models/Line");
 
 // Get all Lines
 router.get("/", async (req, res) => {
-  console.log("hit");
   await Line.find()
     .populate()
     .limit()
