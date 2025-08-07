@@ -1,16 +1,11 @@
 const mongoose = require("mongoose");
 
-const LineSchema = new mongoose.Schema(
+const UserSchema = new mongoose.Schema(
   {
     name: {
       type: String,
       required: true,
       unique: true,
-    },
-    sectionId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Section",
-      required: true,
     },
     isActive: {
       type: Boolean,
@@ -26,8 +21,8 @@ const LineSchema = new mongoose.Schema(
   }
 );
 
-LineSchema.index({ name: 1, sectionId: 1 }, { unique: true });
 
-const Line = mongoose.model("Line", LineSchema);
 
-module.exports = Line;
+const User = mongoose.model("User", UserSchema);
+
+module.exports = User;

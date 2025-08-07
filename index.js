@@ -16,6 +16,8 @@ const innerMachineRouter = require("./router/innerMachineRouter");
 const downTimeReasonRouter = require("./router/downTimeReasonRouter");
 const downTimeCategoryRouter = require("./router/downTimeCategoryRouter");
 const lineCapacityRouter = require("./router/lineCapacityRouter");
+const uomRouter = require("./router/uomRouter");
+const userRouter = require("./router/userRouter");
 
 const app = express();
 app.use(cors());
@@ -39,7 +41,9 @@ app.use("/api/lineOperations", operationRouter);
 app.use("/api/innerMachines", innerMachineRouter);
 app.use("/api/downTimeReasons", downTimeReasonRouter);
 app.use("/api/downTimeCategories", downTimeCategoryRouter);
-app.use("/api/lineCapacity", lineCapacityRouter);
+app.use("/api/lineCapacities", lineCapacityRouter);
+app.use("/api/uoms", uomRouter);
+app.use("/api/users", userRouter);
 
 // Start server
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

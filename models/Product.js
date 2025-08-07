@@ -11,11 +11,17 @@ const productSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    uom: {
-      type: String,
+    primaryUomId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Uom",
       required: true,
     },
-    pcsPerUom: {
+    secondaryUomId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Uom",
+      required: true,
+    },
+    primaryPerSeconsary: {
       type: Number,
       required: true,
     },
@@ -23,8 +29,9 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
-    createdByEnroll: {
-      type: Number,
+    createdById: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
       required: true,
     },
   },

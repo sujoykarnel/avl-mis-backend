@@ -6,13 +6,12 @@ const LineCapacity = require("../models/LineCapacity");
 router.get("/", async (req, res) => {
   await LineCapacity.find()
     .populate("unitId")
-    .populate("sectionId")
     .populate("lineId")
     .populate("productId")
     .lean()
     .limit()
     .then((capacities) => {
-      console.log(capacities);
+      // console.log(capacities);
       res.status(200).json({ capacities });
     })
     .catch((err) => {

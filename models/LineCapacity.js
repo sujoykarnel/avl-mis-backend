@@ -7,11 +7,6 @@ const LineCapacitySchema = new mongoose.Schema(
       ref: "Unit",
       required: true,
     },
-    sectionId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Section",
-      required: true,
-    },
     lineId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Line",
@@ -42,7 +37,7 @@ const LineCapacitySchema = new mongoose.Schema(
 );
 
 LineCapacitySchema.index(
-  { unitId: 1, sectionId: 1, lineId: 1, productId: 1 },
+  { unitId: 1, lineId: 1, productId: 1 },
   { unique: true }
 );
 
