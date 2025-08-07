@@ -4,15 +4,26 @@ const Product = require("../models/Product");
 
 // Get all products
 router.get("/", async (req, res) => {
-  console.log("hit");
   const products = await Product.find();
+  console.log(products);
   res.json(products);
 });
 
 // Get one product
 router.get("/:id", async (req, res) => {
-  const product = await Product.findById(req.params.id);
-  res.json(product);
+  await Product.findById(req.params.id)
+    .populate("primaryUomId")
+    .populate("secondaryUomId")
+    .populate("createdById")
+    .limit()
+    .then((product) => {
+      console.log(product);
+      res.status(200).json({ product });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(404).json({ err, error: "Product not found." });
+    });
 });
 
 // Create product
