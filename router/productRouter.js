@@ -4,9 +4,22 @@ const Product = require("../models/Product");
 
 // Get all products
 router.get("/", async (req, res) => {
-  const products = await Product.find();
-  console.log(products);
-  res.json(products);
+  const search = req.query.search || ""
+  const products = await Product.find({
+    name: { $regex: search, $options: "i" },
+  })
+    .populate("primaryUomId")
+    .populate("secondaryUomId")
+    .populate("createdById")
+    .limit()
+    .then((products) => {
+      console.log(products);
+      res.status(200).json(products);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(404).json({ err, error: "Product not found." });
+    });
 });
 
 // Get one product
@@ -34,7 +47,9 @@ router.post("/", async (req, res) => {
 });
 
 // Update product
-router.put("/:id", async (req, res) => {
+router.patch("/:id", async (req, res) => {
+  // console.log(req.body);
+  console.log(req.params.id, req.body);
   const updated = await Product.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
   });
