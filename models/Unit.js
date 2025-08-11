@@ -9,10 +9,11 @@ const UnitSchema = new mongoose.Schema(
     },
     isActive: {
       type: Boolean,
-      required: true,
+      default: true,
     },
-    createdByEnroll: {
-      type: Number,
+    createdById: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
       required: true,
     },
   },

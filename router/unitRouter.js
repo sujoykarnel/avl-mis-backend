@@ -4,15 +4,37 @@ const Unit = require("../models/Unit");
 
 // Get all units
 router.get("/", async (req, res) => {
-  console.log("hit");
-  const units = await Unit.find();
-  res.json(units);
+  const search = req.query.search || "";
+  const units = await Unit.find({
+    name: { $regex: search, $options: "i" },
+  })
+    .populate()
+    .populate("createdById")
+    .limit()
+    .then((units) => {
+      console.log(units);
+      res.status(200).json(units);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(404).json({ err, error: "Unit not found." });
+    });
 });
 
 // Get one unit
 router.get("/:id", async (req, res) => {
-  const unit = await Unit.findById(req.params.id);
-  res.json(unit);
+  await Unit.findById(req.params.id)
+    .populate()
+    .populate("createdById")
+    .limit()
+    .then((unit) => {
+      console.log(unit);
+      res.status(200).json(unit);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(404).json({ err, error: "Unit not found." });
+    });
 });
 
 // Create unit
@@ -23,7 +45,9 @@ router.post("/", async (req, res) => {
 });
 
 // Update unit
-router.put("/:id", async (req, res) => {
+router.patch("/:id", async (req, res) => {
+  // console.log(req.body);
+  console.log(req.params.id, req.body);
   const updated = await Unit.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
   });

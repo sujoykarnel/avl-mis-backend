@@ -31,7 +31,7 @@ router.get("/:id", async (req, res) => {
     .limit()
     .then((product) => {
       console.log(product);
-      res.status(200).json({ product });
+      res.status(200).json( product );
     })
     .catch((err) => {
       console.log(err);

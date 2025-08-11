@@ -2,35 +2,59 @@ const express = require("express");
 const router = express.Router();
 const Section = require("../models/Section");
 
-// Get all uections
+// Get all sections
 router.get("/", async (req, res) => {
-  console.log("hit");
-  const uections = await Section.find();
-  res.json(uections);
+  const search = req.query.search || "";
+  const sections = await Section.find({
+    name: { $regex: search, $options: "i" },
+  })
+    .populate()
+    .populate("createdById")
+    .limit()
+    .then((sections) => {
+      console.log(sections);
+      res.status(200).json(sections);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(404).json({ err, error: "Section not found." });
+    });
 });
 
-// Get one uection
+// Get one section
 router.get("/:id", async (req, res) => {
-  const uection = await Section.findById(req.params.id);
-  res.json(uection);
+  await Section.findById(req.params.id)
+    .populate()
+    .populate("createdById")
+    .limit()
+    .then((section) => {
+      console.log(section);
+      res.status(200).json(section);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(404).json({ err, error: "Section not found." });
+    });
 });
 
-// Create uection
+// Create section
 router.post("/", async (req, res) => {
-  const uection = new Section(req.body);
-  const savedSection = await uection.save();
+  const section = new Section(req.body);
+  const savedSection = await section.save();
   res.status(201).json(savedSection);
 });
 
-// Update uection
-router.put("/:id", async (req, res) => {
+// Update section
+router.patch("/:id", async (req, res) => {
+  // console.log(req.body);
+  console.log(req.params.id, req.body);
   const updated = await Section.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
   });
   res.json(updated);
 });
 
-// Delete uection
+// Delete section
 router.delete("/:id", async (req, res) => {
   await Section.findByIdAndDelete(req.params.id);
   res.json({ message: "Deleted" });
