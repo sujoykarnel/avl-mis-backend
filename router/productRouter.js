@@ -4,7 +4,8 @@ const Product = require("../models/Product");
 
 // Get all products
 router.get("/", async (req, res) => {
-  const search = req.query.search || ""
+  const search = req.query.search || "";
+
   const products = await Product.find({
     name: { $regex: search, $options: "i" },
   })
@@ -13,7 +14,7 @@ router.get("/", async (req, res) => {
     .populate("createdById")
     .limit()
     .then((products) => {
-      console.log(products);
+      // console.log(products);
       res.status(200).json(products);
     })
     .catch((err) => {
@@ -31,7 +32,7 @@ router.get("/:id", async (req, res) => {
     .limit()
     .then((product) => {
       console.log(product);
-      res.status(200).json( product );
+      res.status(200).json(product);
     })
     .catch((err) => {
       console.log(err);

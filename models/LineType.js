@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const DownTimeCategorySchema = new mongoose.Schema(
+const LineTypeSchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -18,14 +18,11 @@ const DownTimeCategorySchema = new mongoose.Schema(
     },
   },
   {
-    collection: "downTimeCategories",
+    collection: "lineTypes",
     timestamps: true,
   }
 );
 
-const DownTimeCategory = mongoose.model(
-  "DownTimeCategory",
-  DownTimeCategorySchema
-);
+const LineType = mongoose.model("LineType", LineTypeSchema);
 
-module.exports = DownTimeCategory;
+module.exports = LineType;

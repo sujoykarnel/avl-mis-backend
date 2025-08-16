@@ -18,6 +18,7 @@ const downTimeCategoryRouter = require("./router/downTimeCategoryRouter");
 const lineCapacityRouter = require("./router/lineCapacityRouter");
 const uomRouter = require("./router/uomRouter");
 const userRouter = require("./router/userRouter");
+const lineTypeRouter = require("./router/lineTypeRouter");
 
 const app = express();
 app.use(cors());
@@ -36,6 +37,7 @@ mongoose
 app.use("/api/units", unitRouter);
 app.use("/api/sections", sectionRouter);
 app.use("/api/lines", lineRouter);
+app.use("/api/lineTypes", lineTypeRouter);
 app.use("/api/products", productRouter);
 app.use("/api/lineOperations", operationRouter);
 app.use("/api/innerMachines", innerMachineRouter);

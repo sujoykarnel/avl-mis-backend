@@ -7,6 +7,16 @@ const LineSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    lineTypeId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "LineType",
+      required: true,
+    },
+    unitId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Unit",
+      required: true,
+    },
     sectionId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Section",
@@ -14,10 +24,11 @@ const LineSchema = new mongoose.Schema(
     },
     isActive: {
       type: Boolean,
-      required: true,
+      default: true,
     },
-    createdByEnroll: {
-      type: Number,
+    createdById: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
       required: true,
     },
   },
@@ -26,7 +37,7 @@ const LineSchema = new mongoose.Schema(
   }
 );
 
-LineSchema.index({ name: 1, sectionId: 1 }, { unique: true });
+LineSchema.index({ name: 1, unitId: 1, sectionId: 1 }, { unique: true });
 
 const Line = mongoose.model("Line", LineSchema);
 

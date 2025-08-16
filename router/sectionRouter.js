@@ -12,7 +12,7 @@ router.get("/", async (req, res) => {
     .populate("createdById")
     .limit()
     .then((sections) => {
-      console.log(sections);
+      // console.log(sections);
       res.status(200).json(sections);
     })
     .catch((err) => {

@@ -1,62 +1,62 @@
 const express = require("express");
 const router = express.Router();
-const Unit = require("../models/Unit");
+const LineType = require("../models/LineType");
 
-// Get all units
+// Get all lineTypes
 router.get("/", async (req, res) => {
   const search = req.query.search || "";
-  const units = await Unit.find({
+  const lineTypes = await LineType.find({
     name: { $regex: search, $options: "i" },
   })
     .populate()
     .populate("createdById")
     .limit()
-    .then((units) => {
-      // console.log(units);
-      res.status(200).json(units);
+    .then((lineTypes) => {
+      // console.log(lineTypes);
+      res.status(200).json(lineTypes);
     })
     .catch((err) => {
       console.log(err);
-      res.status(404).json({ err, error: "Unit not found." });
+      res.status(404).json({ err, error: "LineType not found." });
     });
 });
 
-// Get one unit
+// Get one lineType
 router.get("/:id", async (req, res) => {
-  await Unit.findById(req.params.id)
+  await LineType.findById(req.params.id)
     .populate()
     .populate("createdById")
     .limit()
-    .then((unit) => {
-      console.log(unit);
-      res.status(200).json(unit);
+    .then((lineType) => {
+      console.log(lineType);
+      res.status(200).json(lineType);
     })
     .catch((err) => {
       console.log(err);
-      res.status(404).json({ err, error: "Unit not found." });
+      res.status(404).json({ err, error: "LineType not found." });
     });
 });
 
-// Create unit
+// Create lineType
 router.post("/", async (req, res) => {
-  const unit = new Unit(req.body);
-  const savedUnit = await unit.save();
-  res.status(201).json(savedUnit);
+  const lineType = new LineType(req.body);
+  const savedLineType = await lineType.save();
+  res.status(201).json(savedLineType);
 });
 
-// Update unit
+// Update lineType
 router.patch("/:id", async (req, res) => {
   // console.log(req.body);
   console.log(req.params.id, req.body);
-  const updated = await Unit.findByIdAndUpdate(req.params.id, req.body, {
+  const updated = await LineType.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
   });
   res.json(updated);
 });
 
-// Delete unit
+// Delete lineType
 router.delete("/:id", async (req, res) => {
-  await Unit.findByIdAndDelete(req.params.id);
+  await LineType.findByIdAndDelete(req.params.id);
   res.json({ message: "Deleted" });
 });
 

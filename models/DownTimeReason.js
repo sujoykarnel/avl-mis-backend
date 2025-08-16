@@ -14,47 +14,48 @@ const ReasonSchema = new mongoose.Schema(
     },
     isPower: {
       type: Boolean,
-      requiredd: true,
+      required: true,
     },
     isElectrical: {
       type: Boolean,
-      requiredd: true,
+      required: true,
     },
     isMechnical: {
       type: Boolean,
-      requiredd: true,
+      required: true,
     },
     isOperational: {
       type: Boolean,
-      requiredd: true,
+      required: true,
     },
     isNoSchedule: {
       type: Boolean,
-      requiredd: true,
+      required: true,
     },
     isCipSipPp: {
       type: Boolean,
-      requiredd: true,
+      required: true,
     },
     isMaterial: {
       type: Boolean,
-      requiredd: true,
+      required: true,
     },
     isScm: {
       type: Boolean,
-      requiredd: true,
+      required: true,
     },
     isSalesAndMarketing: {
       type: Boolean,
-      requiredd: true,
+      required: true,
     },
     isActive: {
       type: Boolean,
-      requiredd: true,
+      default: true,
     },
-    createdByEnroll: {
-      type: Number,
-      requiredd: true,
+    createdById: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
   },
   {

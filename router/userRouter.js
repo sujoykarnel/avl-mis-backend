@@ -4,7 +4,7 @@ const User = require("../models/User");
 
 // Get all users
 router.get("/", async (req, res) => {
-  console.log("hit");
+  // console.log("hit");
   const users = await User.find();
   res.json(users);
 });

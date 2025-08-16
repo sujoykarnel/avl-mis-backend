@@ -9,10 +9,18 @@ const UserSchema = new mongoose.Schema(
     },
     isActive: {
       type: Boolean,
-      required: true,
+      default: true,
     },
-    createdByEnroll: {
-      type: Number,
+    lineIds: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Line",
+      },
+    ],
+
+    createdById: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
       required: true,
     },
   },
