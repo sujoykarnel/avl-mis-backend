@@ -24,4 +24,8 @@ const UnitSchema = new mongoose.Schema(
 
 const Unit = mongoose.model("Unit", UnitSchema);
 
+// sync indexes
+Unit.syncIndexes();
+
+
 module.exports = Unit;

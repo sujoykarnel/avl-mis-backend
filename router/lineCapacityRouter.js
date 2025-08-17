@@ -3,19 +3,21 @@ const router = express.Router();
 const Capacity = require("../models/LineCapacity");
 const { mongoose } = require("mongoose");
 
+
+
+
 // Get all capacities
 router.get("/", async (req, res) => {
   const search = req.query.search || "";
   let lineIds = req.query.lineIds || [];
 
-  
   // Ensure array
   if (typeof lineIds === "string") {
     lineIds = lineIds.split(",");
     // console.log(lineIds);
   }
   const objectLineIds = lineIds.map((id) => new mongoose.Types.ObjectId(id));
-  
+
   console.log(objectLineIds);
   await Capacity.aggregate([
     {

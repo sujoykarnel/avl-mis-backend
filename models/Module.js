@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const UomSchema = new mongoose.Schema(
+const ModuleSchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -12,19 +12,19 @@ const UomSchema = new mongoose.Schema(
       default: true,
     },
     createdById: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "User",
-          required: true,
-        },
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-const Uom = mongoose.model("Uom", UomSchema);
+const Module = mongoose.model("Module", ModuleSchema);
 
 // sync indexes
-Uom.syncIndexes();
+Module.syncIndexes();
 
-module.exports = Uom;
+module.exports = Module;

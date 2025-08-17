@@ -28,4 +28,7 @@ const DownTimeCategory = mongoose.model(
   DownTimeCategorySchema
 );
 
+// sync indexes
+DownTimeCategory.syncIndexes();
+
 module.exports = DownTimeCategory;

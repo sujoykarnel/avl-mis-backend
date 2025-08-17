@@ -5,11 +5,45 @@ const UserSchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
-      unique: true,
     },
-    isActive: {
-      type: Boolean,
-      default: true,
+    frNo: {
+      type: String,
+      required: true,
+    },
+    enroll: {
+      type: Number,
+      required: true,
+    },
+    password: {
+      type: String,
+      required: true,
+      default: "avlmis",
+    },
+    mobileNo: {
+      type: String,
+      required: true,
+
+      match: [/^01[3-9]\d{8}$/, "Please enter a valid mobile number"],
+    },
+    departmentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Department",
+      required: true,
+    },
+    designationId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Designation",
+      required: true,
+    },
+    moduleId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Designation",
+    },
+    role: {
+      type: String,
+      required: true,
+      enum: ["admin", "user"],
+      default: "admin",
     },
     lineIds: [
       {
@@ -17,7 +51,10 @@ const UserSchema = new mongoose.Schema(
         ref: "Line",
       },
     ],
-
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
     createdById: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -29,6 +66,11 @@ const UserSchema = new mongoose.Schema(
   }
 );
 
+UserSchema.index({ frNo: 1, enroll: 1, mobileNo: 1 }, { unique: true });
+
 const User = mongoose.model("User", UserSchema);
+
+// sync indexes
+User.syncIndexes();
 
 module.exports = User;

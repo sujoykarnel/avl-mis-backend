@@ -12,10 +12,10 @@ const InnerMachineSchema = new mongoose.Schema(
       default: true,
     },
     createdById: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "User",
-          required: true,
-        },
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
   },
   {
     collection: "innerMachines",
@@ -24,5 +24,8 @@ const InnerMachineSchema = new mongoose.Schema(
 );
 
 const InnerMachine = mongoose.model("InnerMachine", InnerMachineSchema);
+
+// sync indexes
+InnerMachine.syncIndexes();
 
 module.exports = InnerMachine;

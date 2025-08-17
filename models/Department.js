@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const UomSchema = new mongoose.Schema(
+const DepartmentSchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -12,19 +12,19 @@ const UomSchema = new mongoose.Schema(
       default: true,
     },
     createdById: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "User",
-          required: true,
-        },
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-const Uom = mongoose.model("Uom", UomSchema);
+const Department = mongoose.model("Department", DepartmentSchema);
 
 // sync indexes
-Uom.syncIndexes();
+Department.syncIndexes();
 
-module.exports = Uom;
+module.exports = Department;

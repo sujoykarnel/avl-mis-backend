@@ -22,4 +22,7 @@ const OperationSchema = new mongoose.Schema(
 
 const Operation = mongoose.model("Operation", OperationSchema);
 
+// sync indexes
+Operation.syncIndexes();
+
 module.exports = Operation;

@@ -25,4 +25,7 @@ const LineTypeSchema = new mongoose.Schema(
 
 const LineType = mongoose.model("LineType", LineTypeSchema);
 
+// sync indexes
+LineType.syncIndexes();
+
 module.exports = LineType;

@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const LineType = require("../models/LineType");
 
+
+
 // Get all lineTypes
 router.get("/", async (req, res) => {
   const search = req.query.search || "";

@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const InnerMachine = require("../models/InnerMachine");
 
+
+
 // Get all innerMachines
 router.get("/", async (req, res) => {
   console.log("hit");

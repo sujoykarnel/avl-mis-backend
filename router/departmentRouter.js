@@ -1,19 +1,21 @@
 const express = require("express");
 const router = express.Router();
-const Unit = require("../models/Unit");
+const Department = require("../models/Department");
 
-// Get all units
+
+
+// Get all departments
 router.get("/", async (req, res) => {
   const search = req.query.search || "";
-  const units = await Unit.find({
+  const departments = await Department.find({
     name: { $regex: search, $options: "i" },
   })
     .populate()
     .populate("createdById")
     .limit()
-    .then((units) => {
-      // console.log(units);
-      res.status(200).json(units);
+    .then((departments) => {
+      // console.log(departments);
+      res.status(200).json(departments);
     })
     .catch((err) => {
       console.log(err);
@@ -21,29 +23,29 @@ router.get("/", async (req, res) => {
     });
 });
 
-// Get one unit
+// Get one department
 router.get("/:id", async (req, res) => {
-  await Unit.findById(req.params.id)
+  await Department.findById(req.params.id)
     .populate()
     .populate("createdById")
     .limit()
-    .then((unit) => {
-      console.log(unit);
-      res.status(200).json(unit);
+    .then((department) => {
+      console.log(department);
+      res.status(200).json(department);
     })
     .catch((err) => {
       console.log(err);
-      res.status(404).json({ err, error: "Unit not found." });
+      res.status(404).json({ err, error: "Department not found." });
     });
 });
 
-// Create unit
+// Create department
 router.post("/", async (req, res) => {
-  const unit = new Unit(req.body);
-  const savedUnit = await unit
+  const department = new Department(req.body);
+  const savedDepartment = await department
     .save()
     .then(() => {
-      res.status(201).json(savedUnit);
+      res.status(201).json(savedDepartment);
     })
     .catch((err) => {
       console.log(err.code);
@@ -57,19 +59,19 @@ router.post("/", async (req, res) => {
     });
 });
 
-// Update unit
+// Update department
 router.patch("/:id", async (req, res) => {
   // console.log(req.body);
   console.log(req.params.id, req.body);
-  const updated = await Unit.findByIdAndUpdate(req.params.id, req.body, {
+  const updated = await Department.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
   });
   res.json(updated);
 });
 
-// Delete unit
+// Delete department
 router.delete("/:id", async (req, res) => {
-  await Unit.findByIdAndDelete(req.params.id);
+  await Department.findByIdAndDelete(req.params.id);
   res.json({ message: "Deleted" });
 });
 

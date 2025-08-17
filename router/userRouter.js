@@ -1,12 +1,30 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
+const bcrypt = require("bcrypt");
+
+// sync indexes
+User.syncIndexes();
 
 // Get all users
 router.get("/", async (req, res) => {
-  // console.log("hit");
-  const users = await User.find();
-  res.json(users);
+  const search = req.query.search || "";
+  const users = await User.find({
+    name: { $regex: search, $options: "i" },
+  })
+    .populate("departmentId")
+    .populate("designationId")
+    .populate("moduleId")
+    .populate("createdById")
+    .limit()
+    .then((users) => {
+      // console.log(sections);
+      res.status(200).json(users);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(404).json({ err, error: "Section not found." });
+    });
 });
 
 // Get one user
@@ -17,7 +35,10 @@ router.get("/:id", async (req, res) => {
 
 // Create user
 router.post("/", async (req, res) => {
-  const user = new User(req.body);
+  
+  const hashedPassword = await bcrypt.hash('avlmis', 10);
+  console.log(hashedPassword);
+  const user = new User({ ...req.body, password: hashedPassword });
   const savedUser = await user.save();
   res.status(201).json(savedUser);
 });

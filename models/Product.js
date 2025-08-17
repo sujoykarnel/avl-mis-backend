@@ -42,4 +42,7 @@ const productSchema = new mongoose.Schema(
 
 const Product = mongoose.model("Product", productSchema);
 
+// sync indexes
+Product.syncIndexes();
+
 module.exports = Product;

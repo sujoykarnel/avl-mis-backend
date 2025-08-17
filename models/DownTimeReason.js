@@ -66,4 +66,7 @@ const ReasonSchema = new mongoose.Schema(
 
 const Reason = mongoose.model("Reason", ReasonSchema);
 
+// sync indexes
+Reason.syncIndexes();
+
 module.exports = Reason;

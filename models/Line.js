@@ -41,4 +41,7 @@ LineSchema.index({ name: 1, unitId: 1, sectionId: 1 }, { unique: true });
 
 const Line = mongoose.model("Line", LineSchema);
 
+// sync indexes
+Line.syncIndexes();
+
 module.exports = Line;

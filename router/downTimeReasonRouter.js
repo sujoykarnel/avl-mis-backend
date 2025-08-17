@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const Reason = require("../models/DownTimeReason");
 
+
+
 // Get all reasons
 router.get("/", async (req, res) => {
   console.log("hit");
@@ -24,13 +26,9 @@ router.post("/", async (req, res) => {
 
 // Update reason
 router.put("/:id", async (req, res) => {
-  const updated = await Reason.findByIdAndUpdate(
-    req.params.id,
-    req.body,
-    {
-      new: true,
-    }
-  );
+  const updated = await Reason.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+  });
   res.json(updated);
 });
 

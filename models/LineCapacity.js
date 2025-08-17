@@ -43,4 +43,7 @@ LineCapacitySchema.index(
 
 const LineCapacity = mongoose.model("LineCapacity", LineCapacitySchema);
 
+// sync indexes
+LineCapacity.syncIndexes();
+
 module.exports = LineCapacity;
