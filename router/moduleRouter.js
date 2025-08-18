@@ -42,8 +42,8 @@ router.post("/", async (req, res) => {
   const module = new Module(req.body);
   const savedModule = await module
     .save()
-    .then(() => {
-      res.status(201).json(savedModule);
+    .then((data) => {
+      res.status(201).json(data);
     })
     .catch((err) => {
       console.log(err.code);
@@ -52,7 +52,7 @@ router.post("/", async (req, res) => {
       }
       res.status(404).json({
         err,
-        error: `Duplicate value for field: ${Object.keys(err.keyValue)}`,
+        error: "Item not found.",
       });
     });
 });
@@ -63,8 +63,20 @@ router.patch("/:id", async (req, res) => {
   console.log(req.params.id, req.body);
   const updated = await Module.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
-  });
-  res.json(updated);
+  })
+    .then((data) => {
+      res.status(201).json(data);
+    })
+    .catch((err) => {
+      console.log(err.code);
+      if (err.code === 11000) {
+        res.status(409).json({ err, error: "Duplicate" });
+      }
+      res.status(404).json({
+        err,
+        error: "Item not found.",
+      });
+    });
 });
 
 // Delete module

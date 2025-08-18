@@ -3,9 +3,6 @@ const router = express.Router();
 const Capacity = require("../models/LineCapacity");
 const { mongoose } = require("mongoose");
 
-
-
-
 // Get all capacities
 router.get("/", async (req, res) => {
   const search = req.query.search || "";
@@ -155,8 +152,21 @@ router.get("/:id", async (req, res) => {
 // Create capacity
 router.post("/", async (req, res) => {
   const capacity = new Capacity(req.body);
-  const savedCapacity = await capacity.save();
-  res.status(201).json(savedCapacity);
+  const savedCapacity = await capacity
+    .save()
+    .then((data) => {
+      res.status(201).json(data);
+    })
+    .catch((err) => {
+      console.log(err.code);
+      if (err.code === 11000) {
+        res.status(409).json({ err, error: "Duplicate" });
+      }
+      res.status(404).json({
+        err,
+        error: "Item not found.",
+      });
+    });
 });
 
 // Update capacity
@@ -165,8 +175,20 @@ router.patch("/:id", async (req, res) => {
   console.log(req.params.id, req.body);
   const updated = await Capacity.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
-  });
-  res.json(updated);
+  })
+    .then((data) => {
+      res.status(201).json(data);
+    })
+    .catch((err) => {
+      console.log(err.code);
+      if (err.code === 11000) {
+        res.status(409).json({ err, error: "Duplicate" });
+      }
+      res.status(404).json({
+        err,
+        error: "Item not found.",
+      });
+    });
 });
 
 // Delete capacity

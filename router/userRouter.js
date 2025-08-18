@@ -35,20 +35,44 @@ router.get("/:id", async (req, res) => {
 
 // Create user
 router.post("/", async (req, res) => {
-  
-  const hashedPassword = await bcrypt.hash('avlmis', 10);
+  const hashedPassword = await bcrypt.hash("avlmis", 10);
   console.log(hashedPassword);
   const user = new User({ ...req.body, password: hashedPassword });
-  const savedUser = await user.save();
-  res.status(201).json(savedUser);
+  const savedUser = await user
+    .save()
+    .then((data) => {
+      res.status(201).json(data);
+    })
+    .catch((err) => {
+      console.log(err.code);
+      if (err.code === 11000) {
+        res.status(409).json({ err, error: "Duplicate" });
+      }
+      res.status(404).json({
+        err,
+        error: "Item not found.",
+      });
+    });
 });
 
 // Update user
-router.put("/:id", async (req, res) => {
+router.patch("/:id", async (req, res) => {
   const updated = await User.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
-  });
-  res.json(updated);
+  })
+    .then((data) => {
+      res.status(201).json(data);
+    })
+    .catch((err) => {
+      console.log(err.code);
+      if (err.code === 11000) {
+        res.status(409).json({ err, error: "Duplicate" });
+      }
+      res.status(404).json({
+        err,
+        error: "Item not found.",
+      });
+    });
 });
 
 // Delete user

@@ -2,8 +2,6 @@ const express = require("express");
 const router = express.Router();
 const Line = require("../models/Line");
 
-
-
 // Get all lines
 router.get("/", async (req, res) => {
   const search = req.query.search || "";
@@ -14,6 +12,7 @@ router.get("/", async (req, res) => {
     .populate("sectionId")
     .populate("lineTypeId")
     .populate("createdById")
+    .sort({ unitId: 1, sectionId: 1, name: 1 })
     .limit()
     .then((lines) => {
       // console.log(lines);
@@ -46,8 +45,21 @@ router.get("/:id", async (req, res) => {
 // Create line
 router.post("/", async (req, res) => {
   const line = new Line(req.body);
-  const savedLine = await line.save();
-  res.status(201).json(savedLine);
+  const savedLine = await line
+    .save()
+    .then((data) => {
+      res.status(201).json(data);
+    })
+    .catch((err) => {
+      console.log(err.code);
+      if (err.code === 11000) {
+        res.status(409).json({ err, error: "Duplicate" });
+      }
+      res.status(404).json({
+        err,
+        error: "Item not found.",
+      });
+    });
 });
 
 // Update line
@@ -56,8 +68,20 @@ router.patch("/:id", async (req, res) => {
   console.log(req.params.id, req.body);
   const updated = await Line.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
-  });
-  res.json(updated);
+  })
+    .then((data) => {
+      res.status(201).json(data);
+    })
+    .catch((err) => {
+      console.log(err.code);
+      if (err.code === 11000) {
+        res.status(409).json({ err, error: "Duplicate" });
+      }
+      res.status(404).json({
+        err,
+        error: "Item not found.",
+      });
+    });
 });
 
 // Delete line

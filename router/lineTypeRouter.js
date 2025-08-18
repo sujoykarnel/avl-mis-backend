@@ -42,8 +42,21 @@ router.get("/:id", async (req, res) => {
 // Create lineType
 router.post("/", async (req, res) => {
   const lineType = new LineType(req.body);
-  const savedLineType = await lineType.save();
-  res.status(201).json(savedLineType);
+  const savedLineType = await lineType
+    .save()
+    .then((data) => {
+      res.status(201).json(data);
+    })
+    .catch((err) => {
+      console.log(err.code);
+      if (err.code === 11000) {
+        res.status(409).json({ err, error: "Duplicate" });
+      }
+      res.status(404).json({
+        err,
+        error: "Item not found.",
+      });
+    });
 });
 
 // Update lineType
@@ -52,8 +65,20 @@ router.patch("/:id", async (req, res) => {
   console.log(req.params.id, req.body);
   const updated = await LineType.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
-  });
-  res.json(updated);
+  })
+    .then((data) => {
+      res.status(201).json(data);
+    })
+    .catch((err) => {
+      console.log(err.code);
+      if (err.code === 11000) {
+        res.status(409).json({ err, error: "Duplicate" });
+      }
+      res.status(404).json({
+        err,
+        error: "Item not found.",
+      });
+    });
 });
 
 // Delete lineType

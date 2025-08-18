@@ -40,8 +40,21 @@ router.get("/:id", async (req, res) => {
 // Create section
 router.post("/", async (req, res) => {
   const section = new Section(req.body);
-  const savedSection = await section.save();
-  res.status(201).json(savedSection);
+  const savedSection = await section
+    .save()
+    .then((data) => {
+      res.status(201).json(data);
+    })
+    .catch((err) => {
+      console.log(err.code);
+      if (err.code === 11000) {
+        res.status(409).json({ err, error: "Duplicate" });
+      }
+      res.status(404).json({
+        err,
+        error: "Item not found.",
+      });
+    });
 });
 
 // Update section
@@ -50,8 +63,20 @@ router.patch("/:id", async (req, res) => {
   console.log(req.params.id, req.body);
   const updated = await Section.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
-  });
-  res.json(updated);
+  })
+    .then((data) => {
+      res.status(201).json(data);
+    })
+    .catch((err) => {
+      console.log(err.code);
+      if (err.code === 11000) {
+        res.status(409).json({ err, error: "Duplicate" });
+      }
+      res.status(404).json({
+        err,
+        error: "Item not found.",
+      });
+    });
 });
 
 // Delete section

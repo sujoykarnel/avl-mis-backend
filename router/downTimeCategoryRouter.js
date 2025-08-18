@@ -20,20 +20,45 @@ router.get("/:id", async (req, res) => {
 // Create downTimeCategory
 router.post("/", async (req, res) => {
   const downTimeCategory = new DownTimeCategory(req.body);
-  const savedDownTimeCategory = await downTimeCategory.save();
-  res.status(201).json(savedDownTimeCategory);
+  const savedDownTimeCategory = await downTimeCategory
+    .save()
+    .then((data) => {
+      res.status(201).json(data);
+    })
+    .catch((err) => {
+      console.log(err.code);
+      if (err.code === 11000) {
+        res.status(409).json({ err, error: "Duplicate" });
+      }
+      res.status(404).json({
+        err,
+        error: "Item not found.",
+      });
+    });
 });
 
 // Update downTimeCategory
-router.put("/:id", async (req, res) => {
+router.patch("/:id", async (req, res) => {
   const updated = await DownTimeCategory.findByIdAndUpdate(
     req.params.id,
     req.body,
     {
       new: true,
     }
-  );
-  res.json(updated);
+  )
+    .then((data) => {
+      res.status(201).json(data);
+    })
+    .catch((err) => {
+      console.log(err.code);
+      if (err.code === 11000) {
+        res.status(409).json({ err, error: "Duplicate" });
+      }
+      res.status(404).json({
+        err,
+        error: "Item not found.",
+      });
+    });
 });
 
 // Delete downTimeCategory
