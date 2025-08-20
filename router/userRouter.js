@@ -2,12 +2,16 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
+const { auth } = require("../middlewares/auth");
 
 // sync indexes
 User.syncIndexes();
 
+const defaultPassword = "mis";
+const saltRounds = 10;
+
 // Get all users
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
   const search = req.query.search || "";
   const users = await User.find({
     name: { $regex: search, $options: "i" },
@@ -29,15 +33,28 @@ router.get("/", async (req, res) => {
 
 // Get one user
 router.get("/:id", async (req, res) => {
-  const user = await User.findById(req.params.id);
-  res.json(user);
+  const user = await User.findById(req.params.id)
+    .populate("departmentId")
+    .populate("designationId")
+    .populate("moduleId")
+    .populate("createdById")
+    .limit()
+    .then((user) => {
+      // console.log(sections);
+      res.status(200).json(user);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(404).json({ err, error: "Section not found." });
+    });
 });
 
 // Create user
-router.post("/", async (req, res) => {
-  const hashedPassword = await bcrypt.hash("avlmis", 10);
+router.post("/", auth, async (req, res) => {
+  const hashedPassword = await bcrypt.hash(defaultPassword, saltRounds);
+  const createdById = req.userId;
   console.log(hashedPassword);
-  const user = new User({ ...req.body, password: hashedPassword });
+  const user = new User({ ...req.body, password: hashedPassword, createdById });
   const savedUser = await user
     .save()
     .then((data) => {
@@ -56,8 +73,22 @@ router.post("/", async (req, res) => {
 });
 
 // Update user
-router.patch("/:id", async (req, res) => {
-  const updated = await User.findByIdAndUpdate(req.params.id, req.body, {
+router.patch("/:id", auth, async (req, res) => {
+  const updatedById = req.userId;
+  let updatedData = { ...req.body, updatedById };
+  if (req.body?.password) {
+    if (req.body.password === "reset") {
+      // Reset to default password
+      const hashedPassword = await bcrypt.hash(defaultPassword, saltRounds);
+      updatedData.password = hashedPassword;
+    } else {
+      // Update to provided new password
+      const hashedPassword = await bcrypt.hash(req.body.password, saltRounds);
+      updatedData.password = hashedPassword;
+    }
+  }
+
+  const updated = await User.findByIdAndUpdate(req.params.id, updatedData, {
     new: true,
   })
     .then((data) => {
@@ -76,7 +107,7 @@ router.patch("/:id", async (req, res) => {
 });
 
 // Delete user
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   await User.findByIdAndDelete(req.params.id);
   res.json({ message: "Deleted" });
 });

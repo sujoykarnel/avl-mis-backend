@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const Line = require("../models/Line");
+const { auth } = require("../middlewares/auth");
 
 // Get all lines
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
   const search = req.query.search || "";
   const lines = await Line.find({
     name: { $regex: search, $options: "i" },
@@ -11,7 +12,6 @@ router.get("/", async (req, res) => {
     .populate("unitId")
     .populate("sectionId")
     .populate("lineTypeId")
-    .populate("createdById")
     .sort({ unitId: 1, sectionId: 1, name: 1 })
     .limit()
     .then((lines) => {
@@ -25,12 +25,12 @@ router.get("/", async (req, res) => {
 });
 
 // Get one line
-router.get("/:id", async (req, res) => {
+router.get("/:id", auth, async (req, res) => {
   await Line.findById(req.params.id)
     .populate("unitId")
     .populate("sectionId")
     .populate("lineTypeId")
-    .populate("createdById")
+    .sort()
     .limit()
     .then((line) => {
       console.log(line);
@@ -43,7 +43,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // Create line
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
   const line = new Line(req.body);
   const savedLine = await line
     .save()
@@ -63,7 +63,7 @@ router.post("/", async (req, res) => {
 });
 
 // Update line
-router.patch("/:id", async (req, res) => {
+router.patch("/:id", auth, async (req, res) => {
   // console.log(req.body);
   console.log(req.params.id, req.body);
   const updated = await Line.findByIdAndUpdate(req.params.id, req.body, {
@@ -85,7 +85,7 @@ router.patch("/:id", async (req, res) => {
 });
 
 // Delete line
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   await Line.findByIdAndDelete(req.params.id);
   res.json({ message: "Deleted" });
 });

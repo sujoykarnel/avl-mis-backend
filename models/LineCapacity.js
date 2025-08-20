@@ -2,14 +2,9 @@ const mongoose = require("mongoose");
 
 const LineCapacitySchema = new mongoose.Schema(
   {
-    unitId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Unit",
-      required: true,
-    },
     lineId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Line",
+      ref: "Unit",
       required: true,
     },
     productId: {
@@ -23,11 +18,17 @@ const LineCapacitySchema = new mongoose.Schema(
     },
     isActive: {
       type: Boolean,
+      default: true,
+    },
+    createdById: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
       required: true,
     },
-    createdByEnroll: {
-      type: Number,
-      required: true,
+    updatedById: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      
     },
   },
   {

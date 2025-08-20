@@ -1,11 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const LineType = require("../models/LineType");
+const { auth } = require("../middlewares/auth");
 
 
 
 // Get all lineTypes
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
   const search = req.query.search || "";
   const lineTypes = await LineType.find({
     name: { $regex: search, $options: "i" },
@@ -24,7 +25,7 @@ router.get("/", async (req, res) => {
 });
 
 // Get one lineType
-router.get("/:id", async (req, res) => {
+router.get("/:id", auth, async (req, res) => {
   await LineType.findById(req.params.id)
     .populate()
     .populate("createdById")
@@ -40,7 +41,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // Create lineType
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
   const lineType = new LineType(req.body);
   const savedLineType = await lineType
     .save()
@@ -60,7 +61,7 @@ router.post("/", async (req, res) => {
 });
 
 // Update lineType
-router.patch("/:id", async (req, res) => {
+router.patch("/:id", auth, async (req, res) => {
   // console.log(req.body);
   console.log(req.params.id, req.body);
   const updated = await LineType.findByIdAndUpdate(req.params.id, req.body, {
@@ -82,7 +83,7 @@ router.patch("/:id", async (req, res) => {
 });
 
 // Delete lineType
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   await LineType.findByIdAndDelete(req.params.id);
   res.json({ message: "Deleted" });
 });

@@ -1,11 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const Designation = require("../models/Designation");
-
-
+const { auth } = require("../middlewares/auth");
 
 // Get all designations
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
   const search = req.query.search || "";
   const designations = await Designation.find({
     name: { $regex: search, $options: "i" },
@@ -24,7 +23,7 @@ router.get("/", async (req, res) => {
 });
 
 // Get one designation
-router.get("/:id", async (req, res) => {
+router.get("/:id", auth, async (req, res) => {
   await Designation.findById(req.params.id)
     .populate()
     .populate("createdById")
@@ -40,7 +39,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // Create designation
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
   const designation = new Designation(req.body);
   const savedDesignation = await designation
     .save()
@@ -60,7 +59,7 @@ router.post("/", async (req, res) => {
 });
 
 // Update designation
-router.patch("/:id", async (req, res) => {
+router.patch("/:id", auth, async (req, res) => {
   // console.log(req.body);
   console.log(req.params.id, req.body);
   const updated = await Designation.findByIdAndUpdate(req.params.id, req.body, {
@@ -82,7 +81,7 @@ router.patch("/:id", async (req, res) => {
 });
 
 // Delete designation
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   await Designation.findByIdAndDelete(req.params.id);
   res.json({ message: "Deleted" });
 });

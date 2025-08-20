@@ -1,22 +1,23 @@
 const express = require("express");
 const router = express.Router();
 const Reason = require("../models/DownTimeReason");
+const { auth } = require("../middlewares/auth");
 
 // Get all reasons
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
   console.log("hit");
   const reasons = await Reason.find();
   res.json(reasons);
 });
 
 // Get one reason
-router.get("/:id", async (req, res) => {
+router.get("/:id", auth, async (req, res) => {
   const reason = await Reason.findById(req.params.id);
   res.json(reason);
 });
 
 // Create reason
-router.post("/", async (req, res) => {
+router.post("/",auth, async (req, res) => {
   const reason = new Reason(req.body);
   const savedReason = await reason
     .save()
@@ -36,7 +37,7 @@ router.post("/", async (req, res) => {
 });
 
 // Update reason
-router.patch("/:id", async (req, res) => {
+router.patch("/:id", auth, async (req, res) => {
   const updated = await Reason.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
   })
@@ -56,7 +57,7 @@ router.patch("/:id", async (req, res) => {
 });
 
 // Delete reason
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   await Reason.findByIdAndDelete(req.params.id);
   res.json({ message: "Deleted" });
 });

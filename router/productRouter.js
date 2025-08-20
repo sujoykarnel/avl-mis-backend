@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const Product = require("../models/Product");
+const { auth } = require("../middlewares/auth");
 
 // Get all products
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
   const search = req.query.search || "";
 
   const products = await Product.find({
@@ -24,7 +25,7 @@ router.get("/", async (req, res) => {
 });
 
 // Get one product
-router.get("/:id", async (req, res) => {
+router.get("/:id", auth, async (req, res) => {
   await Product.findById(req.params.id)
     .populate("primaryUomId")
     .populate("secondaryUomId")
@@ -41,7 +42,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // Create product
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
   const product = new Product(req.body);
   const savedProduct = await product
     .save()
@@ -61,7 +62,7 @@ router.post("/", async (req, res) => {
 });
 
 // Update product
-router.patch("/:id", async (req, res) => {
+router.patch("/:id", auth, async (req, res) => {
   // console.log(req.body);
   console.log(req.params.id, req.body);
   const updated = await Product.findByIdAndUpdate(req.params.id, req.body, {
@@ -83,7 +84,7 @@ router.patch("/:id", async (req, res) => {
 });
 
 // Delete product
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   await Product.findByIdAndDelete(req.params.id);
   res.json({ message: "Deleted" });
 });

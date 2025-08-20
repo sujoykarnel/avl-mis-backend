@@ -1,11 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const Department = require("../models/Department");
+const { auth } = require("../middlewares/auth");
 
 
 
 // Get all departments
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
   const search = req.query.search || "";
   const departments = await Department.find({
     name: { $regex: search, $options: "i" },
@@ -24,7 +25,7 @@ router.get("/", async (req, res) => {
 });
 
 // Get one department
-router.get("/:id", async (req, res) => {
+router.get("/:id", auth, async (req, res) => {
   await Department.findById(req.params.id)
     .populate()
     .populate("createdById")
@@ -40,7 +41,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // Create department
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
   const department = new Department(req.body);
   const savedDepartment = await department
     .save()
@@ -60,7 +61,7 @@ router.post("/", async (req, res) => {
 });
 
 // Update department
-router.patch("/:id", async (req, res) => {
+router.patch("/:id", auth, async (req, res) => {
   // console.log(req.body);
   console.log(req.params.id, req.body);
   const updated = await Department.findByIdAndUpdate(req.params.id, req.body, {
@@ -82,7 +83,7 @@ router.patch("/:id", async (req, res) => {
 });
 
 // Delete department
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   await Department.findByIdAndDelete(req.params.id);
   res.json({ message: "Deleted" });
 });

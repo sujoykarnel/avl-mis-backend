@@ -13,6 +13,8 @@ const UserSchema = new mongoose.Schema(
     enroll: {
       type: Number,
       required: true,
+      min: 100000,
+      max: 999999,
     },
     password: {
       type: String,
@@ -22,7 +24,6 @@ const UserSchema = new mongoose.Schema(
     mobileNo: {
       type: String,
       required: true,
-
       match: [/^01[3-9]\d{8}$/, "Please enter a valid mobile number"],
     },
     departmentId: {
@@ -37,13 +38,13 @@ const UserSchema = new mongoose.Schema(
     },
     moduleId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Designation",
+      ref: "Module",
     },
     role: {
       type: String,
       required: true,
       enum: ["admin", "user"],
-      default: "admin",
+      default: "user",
     },
     lineIds: [
       {
@@ -55,10 +56,18 @@ const UserSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    isChangePassword: {
+      type: Boolean,
+      default: false,
+    },
     createdById: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
+    },
+    updatedById: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
   },
   {

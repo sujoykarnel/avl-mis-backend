@@ -1,22 +1,23 @@
 const express = require("express");
 const router = express.Router();
 const InnerMachine = require("../models/InnerMachine");
+const { auth } = require("../middlewares/auth");
 
 // Get all innerMachines
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
   console.log("hit");
   const innerMachines = await InnerMachine.find();
   res.json(innerMachines);
 });
 
 // Get one innerMachine
-router.get("/:id", async (req, res) => {
+router.get("/:id", auth, async (req, res) => {
   const innerMachine = await InnerMachine.findById(req.params.id);
   res.json(innerMachine);
 });
 
 // Create innerMachine
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
   const innerMachine = new InnerMachine(req.body);
   const savedInnerMachine = await innerMachine
     .save()
@@ -36,7 +37,7 @@ router.post("/", async (req, res) => {
 });
 
 // Update innerMachine
-router.patch("/:id", async (req, res) => {
+router.patch("/:id", auth, async (req, res) => {
   const updated = await InnerMachine.findByIdAndUpdate(
     req.params.id,
     req.body,
@@ -60,7 +61,7 @@ router.patch("/:id", async (req, res) => {
 });
 
 // Delete innerMachine
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   await InnerMachine.findByIdAndDelete(req.params.id);
   res.json({ message: "Deleted" });
 });

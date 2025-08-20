@@ -1,24 +1,25 @@
 const express = require("express");
 const router = express.Router();
 const DownTimeCategory = require("../models/DownTimeCategory");
+const { auth } = require("../middlewares/auth");
 
 
 
 // Get all downTimeCategorys
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
   console.log("hit");
   const downTimeCategorys = await DownTimeCategory.find();
   res.json(downTimeCategorys);
 });
 
 // Get one downTimeCategory
-router.get("/:id", async (req, res) => {
+router.get("/:id", auth, async (req, res) => {
   const downTimeCategory = await DownTimeCategory.findById(req.params.id);
   res.json(downTimeCategory);
 });
 
 // Create downTimeCategory
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
   const downTimeCategory = new DownTimeCategory(req.body);
   const savedDownTimeCategory = await downTimeCategory
     .save()
@@ -38,7 +39,7 @@ router.post("/", async (req, res) => {
 });
 
 // Update downTimeCategory
-router.patch("/:id", async (req, res) => {
+router.patch("/:id", auth, async (req, res) => {
   const updated = await DownTimeCategory.findByIdAndUpdate(
     req.params.id,
     req.body,
@@ -62,7 +63,7 @@ router.patch("/:id", async (req, res) => {
 });
 
 // Delete downTimeCategory
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   await DownTimeCategory.findByIdAndDelete(req.params.id);
   res.json({ message: "Deleted" });
 });

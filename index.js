@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const dotenv = require("dotenv");
+const cookieParser = require("cookie-parser");
 dotenv.config();
 
 const PORT = process.env.PORT || 5000;
@@ -22,10 +23,17 @@ const lineTypeRouter = require("./router/lineTypeRouter");
 const departmentRouter = require("./router/departmentRouter");
 const moduleRouter = require("./router/moduleRouter");
 const designationRouter = require("./router/designationRouter");
+const authRouter = require("./router/authRouter");
 
 const app = express();
-app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 
 // MongoDB connection
 mongoose
@@ -52,6 +60,7 @@ app.use("/api/users", userRouter);
 app.use("/api/departments", departmentRouter);
 app.use("/api/modules", moduleRouter);
 app.use("/api/designations", designationRouter);
+app.use("/api/auth", authRouter);
 
 // Start server
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

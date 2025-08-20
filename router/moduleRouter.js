@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const Module = require("../models/Module");
+const { auth } = require("../middlewares/auth");
 
 // Get all modules
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
   const search = req.query.search || "";
   const modules = await Module.find({
     name: { $regex: search, $options: "i" },
@@ -22,7 +23,7 @@ router.get("/", async (req, res) => {
 });
 
 // Get one module
-router.get("/:id", async (req, res) => {
+router.get("/:id", auth, async (req, res) => {
   await Module.findById(req.params.id)
     .populate()
     .populate("createdById")
@@ -38,7 +39,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // Create module
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
   const module = new Module(req.body);
   const savedModule = await module
     .save()
@@ -58,7 +59,7 @@ router.post("/", async (req, res) => {
 });
 
 // Update module
-router.patch("/:id", async (req, res) => {
+router.patch("/:id", auth, async (req, res) => {
   // console.log(req.body);
   console.log(req.params.id, req.body);
   const updated = await Module.findByIdAndUpdate(req.params.id, req.body, {
@@ -80,7 +81,7 @@ router.patch("/:id", async (req, res) => {
 });
 
 // Delete module
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   await Module.findByIdAndDelete(req.params.id);
   res.json({ message: "Deleted" });
 });

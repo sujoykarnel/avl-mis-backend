@@ -2,20 +2,19 @@ const express = require("express");
 const router = express.Router();
 const Capacity = require("../models/LineCapacity");
 const { mongoose } = require("mongoose");
+const { auth } = require("../middlewares/auth");
 
 // Get all capacities
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
   const search = req.query.search || "";
   let lineIds = req.query.lineIds || [];
 
   // Ensure array
   if (typeof lineIds === "string") {
     lineIds = lineIds.split(",");
-    // console.log(lineIds);
   }
   const objectLineIds = lineIds.map((id) => new mongoose.Types.ObjectId(id));
 
-  console.log(objectLineIds);
   await Capacity.aggregate([
     {
       $match: {
@@ -68,15 +67,6 @@ router.get("/", async (req, res) => {
     },
     { $unwind: "$uom" },
     {
-      $lookup: {
-        from: "users",
-        localField: "createdById",
-        foreignField: "_id",
-        as: "createdBy",
-      },
-    },
-    { $unwind: "$createdBy" },
-    {
       $match: {
         $or: [
           { "line.name": { $regex: search, $options: "i" } },
@@ -89,6 +79,7 @@ router.get("/", async (req, res) => {
   ])
     .then((capacities) => {
       res.status(200).json(capacities);
+      // console.log(capacities);
     })
     .catch((err) => {
       onsole.log(err);
@@ -97,7 +88,7 @@ router.get("/", async (req, res) => {
 });
 
 // Get one capacity
-router.get("/:id", async (req, res) => {
+router.get("/:id", auth, async (req, res) => {
   console.log("hit");
   const id = req.params.id;
   const capacity = await Capacity.aggregate([
@@ -129,15 +120,6 @@ router.get("/:id", async (req, res) => {
       },
     },
     { $unwind: "$uom" },
-    {
-      $lookup: {
-        from: "users",
-        localField: "createdById",
-        foreignField: "_id",
-        as: "createdBy",
-      },
-    },
-    { $unwind: "$createdBy" },
   ])
     .then((capacity) => {
       // console.log(capacity);
@@ -150,15 +132,17 @@ router.get("/:id", async (req, res) => {
 });
 
 // Create capacity
-router.post("/", async (req, res) => {
-  const capacity = new Capacity(req.body);
+router.post("/", auth, async (req, res) => {
+  const createdById = req.userId;
+  const newItem = { ...req.body, createdById };
+  const capacity = new Capacity(newItem);
   const savedCapacity = await capacity
     .save()
     .then((data) => {
       res.status(201).json(data);
     })
     .catch((err) => {
-      console.log(err.code);
+      // console.log(err.code);
       if (err.code === 11000) {
         res.status(409).json({ err, error: "Duplicate" });
       }
@@ -170,10 +154,10 @@ router.post("/", async (req, res) => {
 });
 
 // Update capacity
-router.patch("/:id", async (req, res) => {
-  // console.log(req.body);
-  console.log(req.params.id, req.body);
-  const updated = await Capacity.findByIdAndUpdate(req.params.id, req.body, {
+router.patch("/:id", auth, async (req, res) => {
+  const updatedById = req.userId;
+  const updatedData = { ...req.body, updatedById };
+  const updated = await Capacity.findByIdAndUpdate(req.params.id, updatedData, {
     new: true,
   })
     .then((data) => {
@@ -192,7 +176,7 @@ router.patch("/:id", async (req, res) => {
 });
 
 // Delete capacity
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   await Capacity.findByIdAndDelete(req.params.id);
   res.json({ message: "Deleted" });
 });

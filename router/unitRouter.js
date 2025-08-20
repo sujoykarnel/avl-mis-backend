@@ -1,15 +1,15 @@
 const express = require("express");
 const router = express.Router();
 const Unit = require("../models/Unit");
+const { auth } = require("../middlewares/auth");
 
 // Get all units
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
   const search = req.query.search || "";
   const units = await Unit.find({
     name: { $regex: search, $options: "i" },
   })
     .populate()
-    .populate("createdById")
     .limit()
     .then((units) => {
       // console.log(units);
@@ -22,10 +22,9 @@ router.get("/", async (req, res) => {
 });
 
 // Get one unit
-router.get("/:id", async (req, res) => {
+router.get("/:id", auth, async (req, res) => {
   await Unit.findById(req.params.id)
     .populate()
-    .populate("createdById")
     .limit()
     .then((unit) => {
       console.log(unit);
@@ -38,7 +37,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // Create unit
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
   const unit = new Unit(req.body);
   const savedUnit = await unit
     .save()
@@ -58,7 +57,7 @@ router.post("/", async (req, res) => {
 });
 
 // Update unit
-router.patch("/:id", async (req, res) => {
+router.patch("/:id", auth, async (req, res) => {
   // console.log(req.body);
   console.log(req.params.id, req.body);
   const updated = await Unit.findByIdAndUpdate(req.params.id, req.body, {
@@ -80,7 +79,7 @@ router.patch("/:id", async (req, res) => {
 });
 
 // Delete unit
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   await Unit.findByIdAndDelete(req.params.id);
   res.json({ message: "Deleted" });
 });

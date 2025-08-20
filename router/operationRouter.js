@@ -1,22 +1,23 @@
 const express = require("express");
 const router = express.Router();
 const Operation = require("../models/LineOperation");
+const { auth } = require("../middlewares/auth");
 
 // Get all operations
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
   console.log("hit");
   const operations = await Operation.find();
   res.json(operations);
 });
 
 // Get one operation
-router.get("/:id", async (req, res) => {
+router.get("/:id", auth, async (req, res) => {
   const operation = await Operation.findById(req.params.id);
   res.json(operation);
 });
 
 // Create operation
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
   const operation = new Operation(req.body);
   const savedOperation = await operation
     .save()
@@ -36,7 +37,7 @@ router.post("/", async (req, res) => {
 });
 
 // Update operation
-router.put("/:id", async (req, res) => {
+router.put("/:id", auth, async (req, res) => {
   const updated = await Operation.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
   })
@@ -56,7 +57,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // Delete operation
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   await Operation.findByIdAndDelete(req.params.id);
   res.json({ message: "Deleted" });
 });

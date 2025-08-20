@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const Uom = require("../models/UoM");
+const { auth } = require("../middlewares/auth");
 
 // Get all uoms
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
   await Uom.find()
     .populate()
     .limit()
@@ -18,13 +19,13 @@ router.get("/", async (req, res) => {
 });
 
 // Get one uom
-router.get("/:id", async (req, res) => {
+router.get("/:id", auth, async (req, res) => {
   const uom = await Uom.findById(req.params.id);
   res.json(uom);
 });
 
 // Create uom
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
   const uom = new Uom(req.body);
   const savedUom = await uom
     .save()
@@ -44,7 +45,7 @@ router.post("/", async (req, res) => {
 });
 
 // Update uom
-router.put("/:id", async (req, res) => {
+router.put("/:id", auth, async (req, res) => {
   const updated = await Uom.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
   })
@@ -64,7 +65,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // Delete uom
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   await Uom.findByIdAndDelete(req.params.id);
   res.json({ message: "Deleted" });
 });

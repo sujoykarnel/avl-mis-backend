@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const Section = require("../models/Section");
+const { auth } = require("../middlewares/auth");
 
 // Get all sections
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
   const search = req.query.search || "";
   const sections = await Section.find({
     name: { $regex: search, $options: "i" },
@@ -22,7 +23,7 @@ router.get("/", async (req, res) => {
 });
 
 // Get one section
-router.get("/:id", async (req, res) => {
+router.get("/:id", auth, async (req, res) => {
   await Section.findById(req.params.id)
     .populate()
     .populate("createdById")
@@ -38,7 +39,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // Create section
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
   const section = new Section(req.body);
   const savedSection = await section
     .save()
@@ -58,7 +59,7 @@ router.post("/", async (req, res) => {
 });
 
 // Update section
-router.patch("/:id", async (req, res) => {
+router.patch("/:id", auth, async (req, res) => {
   // console.log(req.body);
   console.log(req.params.id, req.body);
   const updated = await Section.findByIdAndUpdate(req.params.id, req.body, {
@@ -80,7 +81,7 @@ router.patch("/:id", async (req, res) => {
 });
 
 // Delete section
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   await Section.findByIdAndDelete(req.params.id);
   res.json({ message: "Deleted" });
 });
