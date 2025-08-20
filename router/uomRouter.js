@@ -26,7 +26,9 @@ router.get("/:id", auth, async (req, res) => {
 
 // Create uom
 router.post("/", auth, async (req, res) => {
-  const uom = new Uom(req.body);
+  const createdById = req.userId;
+  const newItem = { ...req.body, createdById };
+  const uom = new Uom(newItem);
   const savedUom = await uom
     .save()
     .then((data) => {
@@ -45,8 +47,10 @@ router.post("/", auth, async (req, res) => {
 });
 
 // Update uom
-router.put("/:id", auth, async (req, res) => {
-  const updated = await Uom.findByIdAndUpdate(req.params.id, req.body, {
+router.patch("/:id", auth, async (req, res) => {
+  const updatedById = req.userId;
+  const updatedData = { ...req.body, updatedById };
+  const updated = await Uom.findByIdAndUpdate(req.params.id, updatedData, {
     new: true,
   })
     .then((data) => {

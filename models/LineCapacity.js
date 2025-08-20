@@ -28,7 +28,10 @@ const LineCapacitySchema = new mongoose.Schema(
     updatedById: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      
+    },
+    updatedById: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
   },
   {

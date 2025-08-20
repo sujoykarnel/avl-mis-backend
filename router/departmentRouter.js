@@ -42,7 +42,9 @@ router.get("/:id", auth, async (req, res) => {
 
 // Create department
 router.post("/", auth, async (req, res) => {
-  const department = new Department(req.body);
+  const createdById = req.userId;
+  const newItem = { ...req.body, createdById };
+  const department = new Department(newItem);
   const savedDepartment = await department
     .save()
     .then((data) => {
@@ -62,11 +64,15 @@ router.post("/", auth, async (req, res) => {
 
 // Update department
 router.patch("/:id", auth, async (req, res) => {
-  // console.log(req.body);
-  console.log(req.params.id, req.body);
-  const updated = await Department.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-  })
+  const updatedById = req.userId;
+  const updatedData = { ...req.body, updatedById };
+  const updated = await Department.findByIdAndUpdate(
+    req.params.id,
+    updatedData,
+    {
+      new: true,
+    }
+  )
     .then((data) => {
       res.status(201).json(data);
     })

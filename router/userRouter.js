@@ -37,7 +37,6 @@ router.get("/:id", async (req, res) => {
     .populate("departmentId")
     .populate("designationId")
     .populate("moduleId")
-    .populate("createdById")
     .limit()
     .then((user) => {
       // console.log(sections);
@@ -51,10 +50,10 @@ router.get("/:id", async (req, res) => {
 
 // Create user
 router.post("/", auth, async (req, res) => {
-  const hashedPassword = await bcrypt.hash(defaultPassword, saltRounds);
   const createdById = req.userId;
-  console.log(hashedPassword);
-  const user = new User({ ...req.body, password: hashedPassword, createdById });
+  const newItem = { ...req.body, createdById };
+  const hashedPassword = await bcrypt.hash(defaultPassword, saltRounds);
+  const user = new User({ ...newItem, password: hashedPassword, createdById });
   const savedUser = await user
     .save()
     .then((data) => {

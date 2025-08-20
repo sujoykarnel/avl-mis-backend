@@ -38,7 +38,9 @@ router.get("/:id", auth, async (req, res) => {
 
 // Create unit
 router.post("/", auth, async (req, res) => {
-  const unit = new Unit(req.body);
+  const createdById = req.userId;
+  const newItem = { ...req.body, createdById };
+  const unit = new Unit(newItem);
   const savedUnit = await unit
     .save()
     .then((data) => {
@@ -58,9 +60,9 @@ router.post("/", auth, async (req, res) => {
 
 // Update unit
 router.patch("/:id", auth, async (req, res) => {
-  // console.log(req.body);
-  console.log(req.params.id, req.body);
-  const updated = await Unit.findByIdAndUpdate(req.params.id, req.body, {
+  const updatedById = req.userId;
+  const updatedData = { ...req.body, updatedById };
+  const updated = await Unit.findByIdAndUpdate(req.params.id, updatedData, {
     new: true,
   })
     .then((data) => {

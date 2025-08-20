@@ -40,7 +40,9 @@ router.get("/:id", auth, async (req, res) => {
 
 // Create designation
 router.post("/", auth, async (req, res) => {
-  const designation = new Designation(req.body);
+  const createdById = req.userId;
+  const newItem = { ...req.body, createdById };
+  const designation = new Designation(newItem);
   const savedDesignation = await designation
     .save()
     .then((data) => {
@@ -60,11 +62,16 @@ router.post("/", auth, async (req, res) => {
 
 // Update designation
 router.patch("/:id", auth, async (req, res) => {
-  // console.log(req.body);
+  const updatedById = req.userId;
+  const updatedData = { ...req.body, updatedById };
   console.log(req.params.id, req.body);
-  const updated = await Designation.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-  })
+  const updated = await Designation.findByIdAndUpdate(
+    req.params.id,
+    updatedData,
+    {
+      new: true,
+    }
+  )
     .then((data) => {
       res.status(201).json(data);
     })

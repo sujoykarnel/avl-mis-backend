@@ -18,7 +18,9 @@ router.get("/:id", auth, async (req, res) => {
 
 // Create operation
 router.post("/", auth, async (req, res) => {
-  const operation = new Operation(req.body);
+  const createdById = req.userId;
+  const newItem = { ...req.body, createdById };
+  const operation = new Operation(newItem);
   const savedOperation = await operation
     .save()
     .then((data) => {
@@ -37,10 +39,16 @@ router.post("/", auth, async (req, res) => {
 });
 
 // Update operation
-router.put("/:id", auth, async (req, res) => {
-  const updated = await Operation.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-  })
+router.patch("/:id", auth, async (req, res) => {
+  const updatedById = req.userId;
+  const updatedData = { ...req.body, updatedById };
+  const updated = await Operation.findByIdAndUpdate(
+    req.params.id,
+    updatedData,
+    {
+      new: true,
+    }
+  )
     .then((data) => {
       res.status(201).json(data);
     })

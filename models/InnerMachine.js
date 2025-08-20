@@ -16,6 +16,10 @@ const InnerMachineSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    updatedById: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
   },
   {
     collection: "innerMachines",

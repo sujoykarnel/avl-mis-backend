@@ -17,8 +17,10 @@ router.get("/:id", auth, async (req, res) => {
 });
 
 // Create reason
-router.post("/",auth, async (req, res) => {
-  const reason = new Reason(req.body);
+router.post("/", auth, async (req, res) => {
+  const createdById = req.userId;
+  const newItem = { ...req.body, createdById };
+  const reason = new Reason(newItem);
   const savedReason = await reason
     .save()
     .then((data) => {
@@ -38,7 +40,9 @@ router.post("/",auth, async (req, res) => {
 
 // Update reason
 router.patch("/:id", auth, async (req, res) => {
-  const updated = await Reason.findByIdAndUpdate(req.params.id, req.body, {
+  const updatedById = req.userId;
+  const updatedData = { ...req.body, updatedById };
+  const updated = await Reason.findByIdAndUpdate(req.params.id, updatedData, {
     new: true,
   })
     .then((data) => {

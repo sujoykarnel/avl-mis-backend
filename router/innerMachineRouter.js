@@ -18,7 +18,9 @@ router.get("/:id", auth, async (req, res) => {
 
 // Create innerMachine
 router.post("/", auth, async (req, res) => {
-  const innerMachine = new InnerMachine(req.body);
+  const createdById = req.userId;
+  const newItem = { ...req.body, createdById };
+  const innerMachine = new InnerMachine(newItem);
   const savedInnerMachine = await innerMachine
     .save()
     .then((data) => {
@@ -38,9 +40,11 @@ router.post("/", auth, async (req, res) => {
 
 // Update innerMachine
 router.patch("/:id", auth, async (req, res) => {
+  const updatedById = req.userId;
+  const updatedData = { ...req.body, updatedById };
   const updated = await InnerMachine.findByIdAndUpdate(
     req.params.id,
-    req.body,
+    updatedData,
     {
       new: true,
     }

@@ -40,7 +40,9 @@ router.get("/:id", auth, async (req, res) => {
 
 // Create section
 router.post("/", auth, async (req, res) => {
-  const section = new Section(req.body);
+  const createdById = req.userId;
+  const newItem = { ...req.body, createdById };
+  const section = new Section(newItem);
   const savedSection = await section
     .save()
     .then((data) => {
@@ -60,9 +62,10 @@ router.post("/", auth, async (req, res) => {
 
 // Update section
 router.patch("/:id", auth, async (req, res) => {
-  // console.log(req.body);
+  const updatedById = req.userId;
+  const updatedData = { ...req.body, updatedById };
   console.log(req.params.id, req.body);
-  const updated = await Section.findByIdAndUpdate(req.params.id, req.body, {
+  const updated = await Section.findByIdAndUpdate(req.params.id, updatedData, {
     new: true,
   })
     .then((data) => {

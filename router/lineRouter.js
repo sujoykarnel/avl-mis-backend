@@ -44,7 +44,9 @@ router.get("/:id", auth, async (req, res) => {
 
 // Create line
 router.post("/", auth, async (req, res) => {
-  const line = new Line(req.body);
+  const createdById = req.userId;
+  const newItem = { ...req.body, createdById };
+  const line = new Line(newItem);
   const savedLine = await line
     .save()
     .then((data) => {
@@ -64,9 +66,9 @@ router.post("/", auth, async (req, res) => {
 
 // Update line
 router.patch("/:id", auth, async (req, res) => {
-  // console.log(req.body);
-  console.log(req.params.id, req.body);
-  const updated = await Line.findByIdAndUpdate(req.params.id, req.body, {
+  const updatedById = req.userId;
+  const updatedData = { ...req.body, updatedById };
+  const updated = await Line.findByIdAndUpdate(req.params.id, updatedData, {
     new: true,
   })
     .then((data) => {

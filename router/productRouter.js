@@ -43,7 +43,9 @@ router.get("/:id", auth, async (req, res) => {
 
 // Create product
 router.post("/", auth, async (req, res) => {
-  const product = new Product(req.body);
+  const createdById = req.userId;
+  const newItem = { ...req.body, createdById };
+  const product = new Product(newItem);
   const savedProduct = await product
     .save()
     .then((data) => {
@@ -63,9 +65,9 @@ router.post("/", auth, async (req, res) => {
 
 // Update product
 router.patch("/:id", auth, async (req, res) => {
-  // console.log(req.body);
-  console.log(req.params.id, req.body);
-  const updated = await Product.findByIdAndUpdate(req.params.id, req.body, {
+  const updatedById = req.userId;
+  const updatedData = { ...req.body, updatedById };
+  const updated = await Product.findByIdAndUpdate(req.params.id, updatedData, {
     new: true,
   })
     .then((data) => {

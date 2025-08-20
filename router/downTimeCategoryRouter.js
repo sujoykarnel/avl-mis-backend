@@ -20,7 +20,9 @@ router.get("/:id", auth, async (req, res) => {
 
 // Create downTimeCategory
 router.post("/", auth, async (req, res) => {
-  const downTimeCategory = new DownTimeCategory(req.body);
+  const createdById = req.userId;
+  const newItem = { ...req.body, createdById };
+  const downTimeCategory = new DownTimeCategory(newItem);
   const savedDownTimeCategory = await downTimeCategory
     .save()
     .then((data) => {
@@ -40,9 +42,11 @@ router.post("/", auth, async (req, res) => {
 
 // Update downTimeCategory
 router.patch("/:id", auth, async (req, res) => {
+  const updatedById = req.userId;
+  const updatedData = { ...req.body, updatedById };
   const updated = await DownTimeCategory.findByIdAndUpdate(
     req.params.id,
-    req.body,
+    updatedData,
     {
       new: true,
     }
