@@ -4,9 +4,8 @@ const Reason = require("../models/DownTimeReason");
 const { auth } = require("../middlewares/auth");
 
 // Get all reasons
-router.get("/", auth, async (req, res) => {
-  console.log("hit");
-  const reasons = await Reason.find();
+router.get("/", async (req, res) => {
+  const reasons = await Reason.find().populate("downTimeCategoryIds");
   res.json(reasons);
 });
 

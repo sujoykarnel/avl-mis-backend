@@ -1,11 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const Capacity = require("../models/LineCapacity");
+const LineLog = require("../models/LineLog");
 const { mongoose } = require("mongoose");
 const { auth } = require("../middlewares/auth");
 
-// Get all capacities
-router.get("/", auth, async (req, res) => {
+// Get all lineLogs
+router.get("/",  async (req, res) => {
   const search = req.query.search || "";
   let lineIds = req.query.lineIds || [];
 
@@ -15,16 +15,25 @@ router.get("/", auth, async (req, res) => {
   }
   const objectLineIds = lineIds.map((id) => new mongoose.Types.ObjectId(id));
 
-  await Capacity.aggregate([
+  await LineLog.aggregate([
+    // {
+    //   $match: {
+    //     lineId: { $in: objectLineIds },
+    //   },
+    // },
     {
-      $match: {
-        lineId: { $in: objectLineIds },
+      $lookup: {
+        from: "lineCapacities",
+        localField: "capacityId",
+        foreignField: "_id",
+        as: "capacity",
       },
     },
+    { $unwind: "$capacity" },
     {
       $lookup: {
         from: "lines",
-        localField: "lineId",
+        localField: "capacity.lineId",
         foreignField: "_id",
         as: "line",
       },
@@ -60,7 +69,7 @@ router.get("/", auth, async (req, res) => {
     {
       $lookup: {
         from: "products",
-        localField: "productId",
+        localField: "capacity.productId",
         foreignField: "_id",
         as: "product",
       },
@@ -76,6 +85,51 @@ router.get("/", auth, async (req, res) => {
     },
     { $unwind: "$uom" },
     {
+      $lookup: {
+        from: "lineOperations",
+        localField: "operationId",
+        foreignField: "_id",
+        as: "operation",
+      },
+    },
+    { $unwind: "$operation" },
+    {
+      $lookup: {
+        from: "downTimeCategories",
+        localField: "downtimeCategoryId",
+        foreignField: "_id",
+        as: "downTimeCategory",
+      },
+    },
+    { $unwind: "$downTimeCategory" },
+    {
+      $lookup: {
+        from: "downTimeReasons",
+        localField: "downtimeReasonId",
+        foreignField: "_id",
+        as: "downTimeReason",
+      },
+    },
+    { $unwind: "$downTimeReason" },
+    {
+      $lookup: {
+        from: "innerMachines",
+        localField: "innerMachineId",
+        foreignField: "_id",
+        as: "innerMachine",
+      },
+    },
+    { $unwind: "$innerMachine" },
+    {
+      $lookup: {
+        from: "users",
+        localField: "createdById",
+        foreignField: "_id",
+        as: "createdBy",
+      },
+    },
+    { $unwind: "$createdBy" },
+    {
       $match: {
         $or: [
           { "line.name": { $regex: search, $options: "i" } },
@@ -86,20 +140,20 @@ router.get("/", auth, async (req, res) => {
       },
     },
   ])
-    .then((capacities) => {
-      res.status(200).json(capacities);
-      // console.log(capacities);
+    .then((lineLogs) => {
+      res.status(200).json(lineLogs);
+      // console.log(lineLogs);
     })
     .catch((err) => {
       onsole.log(err);
-      res.status(404).json({ err, error: "Capacities not found." });
+      res.status(404).json({ err, error: "LineLogs not found." });
     });
 });
 
-// Get one capacity
+// Get one lineLog
 router.get("/:id", auth, async (req, res) => {
   const id = req.params.id;
-  const capacity = await Capacity.aggregate([
+  const lineLog = await LineLog.aggregate([
     { $match: { _id: new mongoose.Types.ObjectId(id) } },
     {
       $lookup: {
@@ -138,28 +192,30 @@ router.get("/:id", auth, async (req, res) => {
     },
     { $unwind: "$uom" },
   ])
-    .then((capacity) => {
-      // console.log(capacity);
-      res.status(200).json(capacity);
+    .then((lineLog) => {
+      // console.log(lineLog);
+      res.status(200).json(lineLog);
     })
     .catch((err) => {
       console.log(err);
-      res.status(404).json({ err, error: "Capacity not found." });
+      res.status(404).json({ err, error: "LineLog not found." });
     });
 });
 
-// Create capacity
+// Create lineLog
 router.post("/", auth, async (req, res) => {
   const createdById = req.userId;
   const newItem = { ...req.body, createdById };
-  const capacity = new Capacity(newItem);
-  const savedCapacity = await capacity
+  const lineLog = new LineLog(newItem);
+  console.log(newItem, lineLog);
+  const savedLineLog = await lineLog
     .save()
     .then((data) => {
+      console.log(data);
       res.status(201).json(data);
     })
     .catch((err) => {
-      // console.log(err.code);
+      console.log(err.code);
       if (err.code === 11000) {
         res.status(409).json({ err, error: "Duplicate" });
       }
@@ -170,11 +226,11 @@ router.post("/", auth, async (req, res) => {
     });
 });
 
-// Update capacity
+// Update lineLog
 router.patch("/:id", auth, async (req, res) => {
   const updatedById = req.userId;
   const updatedData = { ...req.body, updatedById };
-  const updated = await Capacity.findByIdAndUpdate(req.params.id, updatedData, {
+  const updated = await LineLog.findByIdAndUpdate(req.params.id, updatedData, {
     new: true,
   })
     .then((data) => {
@@ -192,9 +248,9 @@ router.patch("/:id", auth, async (req, res) => {
     });
 });
 
-// Delete capacity
+// Delete lineLog
 router.delete("/:id", auth, async (req, res) => {
-  await Capacity.findByIdAndDelete(req.params.id);
+  await LineLog.findByIdAndDelete(req.params.id);
   res.json({ message: "Deleted" });
 });
 

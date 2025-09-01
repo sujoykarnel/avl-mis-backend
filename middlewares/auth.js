@@ -6,7 +6,7 @@ const auth = (req, res, next) => {
     if (!token)
       return res.status(401).json({ ok: false, message: "Token Missing" });
     const payload = jwt.verify(token, process.env.JWT_SECRET);
-    req.userId = payload._id;
+    req.userId = payload._id || payload.id;
     next();
   } catch (err) {
     return res

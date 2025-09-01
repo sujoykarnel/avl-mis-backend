@@ -14,9 +14,7 @@ const saltRounds = 10;
 
 // Login User
 router.post("/login", async (req, res) => {
-  console.log("hit");
   const { enroll, password } = req.body;
-  console.log();
   const user = await User.findOne({ enroll })
     .then(async (user) => {
       if (user) {
@@ -73,7 +71,6 @@ router.get("/profile", auth, async (req, res) => {
     .populate("departmentId")
     .populate("designationId")
     .populate("moduleId")
-    .limit()
     .then((user) => {
       res.status(200).json(user);
     })

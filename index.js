@@ -24,6 +24,8 @@ const departmentRouter = require("./router/departmentRouter");
 const moduleRouter = require("./router/moduleRouter");
 const designationRouter = require("./router/designationRouter");
 const authRouter = require("./router/authRouter");
+const userRoleRouter = require("./router/userRoleRouter");
+const lineLogRouter = require("./router/lineLogRouter");
 
 const app = express();
 app.use(express.json());
@@ -61,6 +63,8 @@ app.use("/api/departments", departmentRouter);
 app.use("/api/modules", moduleRouter);
 app.use("/api/designations", designationRouter);
 app.use("/api/auth", authRouter);
+app.use("/api/userRoles", userRoleRouter);
+app.use("/api/lineLogs", lineLogRouter);
 
 // Start server
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

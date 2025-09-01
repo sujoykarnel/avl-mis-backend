@@ -19,6 +19,7 @@ router.get("/", auth, async (req, res) => {
     .populate("departmentId")
     .populate("designationId")
     .populate("moduleId")
+    .populate("roleId")
     .populate("createdById")
     .limit()
     .then((users) => {
@@ -32,12 +33,12 @@ router.get("/", auth, async (req, res) => {
 });
 
 // Get one user
-router.get("/:id", async (req, res) => {
+router.get("/:id", auth, async (req, res) => {
   const user = await User.findById(req.params.id)
     .populate("departmentId")
     .populate("designationId")
     .populate("moduleId")
-    .limit()
+    .populate("roleId")
     .then((user) => {
       // console.log(sections);
       res.status(200).json(user);
@@ -51,9 +52,9 @@ router.get("/:id", async (req, res) => {
 // Create user
 router.post("/", auth, async (req, res) => {
   const createdById = req.userId;
-  const newItem = { ...req.body, createdById };
   const hashedPassword = await bcrypt.hash(defaultPassword, saltRounds);
-  const user = new User({ ...newItem, password: hashedPassword, createdById });
+  const newItem = { ...req.body, password: hashedPassword, createdById };
+  const user = new User(newItem);
   const savedUser = await user
     .save()
     .then((data) => {

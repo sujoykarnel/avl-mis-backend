@@ -5,7 +5,6 @@ const { auth } = require("../middlewares/auth");
 
 // Get all operations
 router.get("/", auth, async (req, res) => {
-  console.log("hit");
   const operations = await Operation.find();
   res.json(operations);
 });

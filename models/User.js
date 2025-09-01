@@ -40,11 +40,9 @@ const UserSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Module",
     },
-    role: {
-      type: String,
-      required: true,
-      enum: ["admin", "user"],
-      default: "user",
+    roleId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "UserRole",
     },
     lineIds: [
       {

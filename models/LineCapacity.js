@@ -35,7 +35,7 @@ const LineCapacitySchema = new mongoose.Schema(
     },
   },
   {
-    collection: "lineCapacity",
+    collection: "lineCapacities",
     timestamps: true,
   }
 );

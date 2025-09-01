@@ -7,7 +7,6 @@ const { auth } = require("../middlewares/auth");
 
 // Get all downTimeCategorys
 router.get("/", auth, async (req, res) => {
-  console.log("hit");
   const downTimeCategorys = await DownTimeCategory.find();
   res.json(downTimeCategorys);
 });

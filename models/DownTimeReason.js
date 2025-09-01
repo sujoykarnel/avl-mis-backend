@@ -1,53 +1,23 @@
 const mongoose = require("mongoose");
+const Counter = require("./Counter");
 
 const ReasonSchema = new mongoose.Schema(
   {
     code: {
       type: String,
-      requiredd: true,
       unique: true,
     },
     name: {
       type: String,
-      requiredd: true,
+      required: true,
       unique: true,
     },
-    isPower: {
-      type: Boolean,
-      required: true,
-    },
-    isElectrical: {
-      type: Boolean,
-      required: true,
-    },
-    isMechnical: {
-      type: Boolean,
-      required: true,
-    },
-    isOperational: {
-      type: Boolean,
-      required: true,
-    },
-    isNoSchedule: {
-      type: Boolean,
-      required: true,
-    },
-    isCipSipPp: {
-      type: Boolean,
-      required: true,
-    },
-    isMaterial: {
-      type: Boolean,
-      required: true,
-    },
-    isScm: {
-      type: Boolean,
-      required: true,
-    },
-    isSalesAndMarketing: {
-      type: Boolean,
-      required: true,
-    },
+    downTimeCategoryIds: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "DownTimeCategory",
+      },
+    ],
     isActive: {
       type: Boolean,
       default: true,
@@ -67,6 +37,30 @@ const ReasonSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+// helper for sequence
+const getNextCode = (seqName, prefix, width) => {
+  return Counter.findByIdAndUpdate(
+    { _id: seqName },
+    { $inc: { seq: 1 } },
+    { new: true, upsert: true }
+  ).then((counter) => `${prefix}${String(counter.seq).padStart(width, "0")}`);
+};
+
+// pre-seve for auto increment code
+ReasonSchema.pre("save", function (next) {
+  const doc = this;
+  if (doc.isNew && !doc.code) {
+    getNextCode("downTimeReasonCode", "BD", 5)
+      .then((code) => {
+        doc.code = code;
+        next();
+      })
+      .catch((err) => next(err));
+  } else {
+    next();
+  }
+});
 
 const Reason = mongoose.model("Reason", ReasonSchema);
 

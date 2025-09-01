@@ -6,21 +6,60 @@ const { auth } = require("../middlewares/auth");
 // Get all lines
 router.get("/", auth, async (req, res) => {
   const search = req.query.search || "";
-  const lines = await Line.find({
-    name: { $regex: search, $options: "i" },
-  })
-    .populate("unitId")
-    .populate("sectionId")
-    .populate("lineTypeId")
-    .sort({ unitId: 1, sectionId: 1, name: 1 })
-    .limit()
+  await Line.aggregate([
+    {
+      $lookup: {
+        from: "units",
+        localField: "unitId",
+        foreignField: "_id",
+        as: "unit",
+      },
+    },
+    { $unwind: "$unit" },
+    {
+      $lookup: {
+        from: "sections",
+        localField: "sectionId",
+        foreignField: "_id",
+        as: "section",
+      },
+    },
+    { $unwind: "$section" },
+    {
+      $lookup: {
+        from: "lineTypes",
+        localField: "lineTypeId",
+        foreignField: "_id",
+        as: "lineType",
+      },
+    },
+    { $unwind: "$lineType" },
+    {
+      $match: {
+        $or: [
+          { name: { $regex: search, $options: "i" } },
+          { "lineType.name": { $regex: search, $options: "i" } },
+          { "unit.name": { $regex: search, $options: "i" } },
+          { "section.name": { $regex: search, $options: "i" } },
+        ],
+      },
+    },
+    {
+      $sort: {
+        "unit.name": 1,
+        "section.name": 1,
+        name: 1,
+        "lineType.name": 1,
+      },
+    },
+  ])
     .then((lines) => {
-      // console.log(lines);
       res.status(200).json(lines);
+      console.log(lines);
     })
     .catch((err) => {
-      console.log(err);
-      res.status(404).json({ err, error: "Line not found." });
+      onsole.log(err);
+      res.status(404).json({ err, error: "Capacities not found." });
     });
 });
 
