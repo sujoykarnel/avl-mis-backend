@@ -5,9 +5,11 @@ const { mongoose } = require("mongoose");
 const { auth } = require("../middlewares/auth");
 
 // Get all lineLogs
-router.get("/",  async (req, res) => {
+router.get("/", async (req, res) => {
   const search = req.query.search || "";
-  let lineIds = req.query.lineIds || [];
+  let lineIds = req.query.lineId || [];
+
+  console.log(lineIds);
 
   // Ensure array
   if (typeof lineIds === "string") {
@@ -16,11 +18,6 @@ router.get("/",  async (req, res) => {
   const objectLineIds = lineIds.map((id) => new mongoose.Types.ObjectId(id));
 
   await LineLog.aggregate([
-    // {
-    //   $match: {
-    //     lineId: { $in: objectLineIds },
-    //   },
-    // },
     {
       $lookup: {
         from: "lineCapacities",
@@ -101,7 +98,9 @@ router.get("/",  async (req, res) => {
         as: "downTimeCategory",
       },
     },
-    { $unwind: "$downTimeCategory" },
+    {
+      $unwind: { path: "$downTimeCategory", preserveNullAndEmptyArrays: true },
+    },
     {
       $lookup: {
         from: "downTimeReasons",
@@ -110,7 +109,7 @@ router.get("/",  async (req, res) => {
         as: "downTimeReason",
       },
     },
-    { $unwind: "$downTimeReason" },
+    { $unwind: { path: "$downTimeReason", preserveNullAndEmptyArrays: true } },
     {
       $lookup: {
         from: "innerMachines",
@@ -119,7 +118,7 @@ router.get("/",  async (req, res) => {
         as: "innerMachine",
       },
     },
-    { $unwind: "$innerMachine" },
+    { $unwind: { path: "$innerMachine", preserveNullAndEmptyArrays: true } },
     {
       $lookup: {
         from: "users",
@@ -129,6 +128,11 @@ router.get("/",  async (req, res) => {
       },
     },
     { $unwind: "$createdBy" },
+    {
+      $match: {
+        "line._id": { $in: objectLineIds },
+      },
+    },
     {
       $match: {
         $or: [

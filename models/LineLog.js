@@ -19,30 +19,33 @@ const LineLogSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
-    endCounter: {
-      type: Number,
-      required: true,
-    },
     initCounter: {
       type: Number,
       required: true,
     },
-    downtimeCategoryId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "DownTimeCategory",
-    },
-    downtimeReasonId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "DownTimeReason",
-    },
-    innerMachineId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "InnerMachine",
+    endCounter: {
+      type: Number,
+      required: true,
     },
     operationId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "LineOperation",
       required: true,
+    },
+    downtimeCategoryId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "DownTimeCategory",
+      default: null,
+    },
+    downtimeReasonId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "DownTimeReason",
+      default: null,
+    },
+    innerMachineId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "InnerMachine",
+      default: null,
     },
     productionQty: {
       type: Number,
@@ -54,6 +57,7 @@ const LineLogSchema = new mongoose.Schema(
     },
     remarks: {
       type: String,
+      default: "",
       trim: true,
     },
     isActive: {
@@ -68,6 +72,7 @@ const LineLogSchema = new mongoose.Schema(
     updatedById: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      default: null,
     },
   },
   {
@@ -76,10 +81,7 @@ const LineLogSchema = new mongoose.Schema(
   }
 );
 
-LineLogSchema.index(
-  { capacityId: 1, fromDateTime: 1, toDateTime: 1 },
-  { unique: true }
-);
+LineLogSchema.index({ capacityId: 1, fromDateTime: 1 }, { unique: true });
 
 const LineLog = mongoose.model("LineLog", LineLogSchema);
 
