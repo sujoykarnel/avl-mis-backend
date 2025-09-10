@@ -31,7 +31,7 @@ router.get("/:id", auth, async (req, res) => {
     .populate("createdById")
     .limit()
     .then((lineType) => {
-      console.log(lineType);
+      // console.log(lineType);
       res.status(200).json(lineType);
     })
     .catch((err) => {

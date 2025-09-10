@@ -16,6 +16,8 @@ const saltRounds = 10;
 router.post("/login", async (req, res) => {
   const { enroll, password } = req.body;
   const user = await User.findOne({ enroll })
+    .populate("roleId")
+    .populate("moduleId")
     .then(async (user) => {
       if (user) {
         const isValidPassword = await bcrypt.compare(
@@ -23,8 +25,14 @@ router.post("/login", async (req, res) => {
           user.password
         );
         if (isValidPassword) {
-          const { _id, name, enroll } = user;
-          const userData = { _id, name, enroll };
+          const { _id, name, enroll, roleId } = user;
+          const userData = {
+            _id,
+            name,
+            enroll,
+            role: roleId?.name,
+          };
+          console.log(userData);
           const token = jwt.sign(userData, process.env.JWT_SECRET, {
             expiresIn: "8h",
           });
@@ -38,6 +46,10 @@ router.post("/login", async (req, res) => {
                 process.env.NODE_ENV === "production" ? "none" : "strict",
             })
             .send(userWithoutPassword);
+        } else {
+          res.status(401).json({
+            error: "Authentication failed!",
+          });
         }
       } else {
         res.status(401).json({
@@ -71,6 +83,7 @@ router.get("/profile", auth, async (req, res) => {
     .populate("departmentId")
     .populate("designationId")
     .populate("moduleId")
+    .populate("roleId")
     .then((user) => {
       res.status(200).json(user);
     })

@@ -4,25 +4,36 @@ const Product = require("../models/Product");
 const { auth } = require("../middlewares/auth");
 
 // Get all products
-router.get("/", auth, async (req, res) => {
+router.get("/", auth, (req, res) => {
   const search = req.query.search || "";
-
-  const products = await Product.find({
+  const page = parseInt(req.query.currentPage);
+  const size = parseInt(req.query.rowPerPage);
+  Product.find({
     name: { $regex: search, $options: "i" },
   })
     .populate("primaryUomId")
     .populate("secondaryUomId")
     .populate("createdById")
-    .limit()
-    .then((products) => {
-      // console.log(products);
-      res.status(200).json(products);
+    .skip(page * size)
+    .limit(size)
+    .then((data) => {
+      Product.countDocuments({ name: { $regex: search, $options: "i" } })
+        .then((count) => {
+          const sendData = { data, totalCount: count };
+          res.status(200).json({ data, totalCount: count });
+        })
+        .catch((countErr) => {
+          console.error(countErr);
+          res.status(500).json({ error: "Failed to count products." });
+        });
     })
     .catch((err) => {
       console.log(err);
       res.status(404).json({ err, error: "Product not found." });
     });
 });
+
+
 
 // Get one product
 router.get("/:id", auth, async (req, res) => {

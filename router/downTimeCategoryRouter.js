@@ -3,11 +3,13 @@ const router = express.Router();
 const DownTimeCategory = require("../models/DownTimeCategory");
 const { auth } = require("../middlewares/auth");
 
-
-
 // Get all downTimeCategorys
-router.get("/", auth, async (req, res) => {
-  const downTimeCategorys = await DownTimeCategory.find();
+router.get("/", async (req, res) => {
+  const search = req.query.search || "";
+  console.log("hit");
+  const downTimeCategorys = await DownTimeCategory.find({
+    name: { $regex: search, $options: "i" },
+  });
   res.json(downTimeCategorys);
 });
 

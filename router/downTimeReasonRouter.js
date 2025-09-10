@@ -1,26 +1,61 @@
 const express = require("express");
 const router = express.Router();
-const Reason = require("../models/DownTimeReason");
+const DownTimeReason = require("../models/DownTimeReason");
 const { auth } = require("../middlewares/auth");
 
-// Get all reasons
-router.get("/", async (req, res) => {
-  const reasons = await Reason.find().populate("downTimeCategoryIds");
-  res.json(reasons);
+// Get all downTimeReasons
+router.get("/", auth, (req, res) => {
+  const userRole = req.userRole;
+  const search = req.query.search || "";
+  const page = parseInt(req.query.currentPage);
+  const size = parseInt(req.query.rowPerPage);
+  console.log(req);
+  DownTimeReason.find({
+    ...(userRole === "User" ? { isActive: true } : {}),
+    name: { $regex: search, $options: "i" },
+  })
+    .populate("downTimeCategoryIds")
+    .skip(page * size)
+    .limit(size)
+    .sort({ code: 1, name: 1 })
+    .then((data) => {
+      DownTimeReason.countDocuments({ name: { $regex: search, $options: "i" } })
+        .then((count) => {
+          const sendData = { data, totalCount: count };
+          res.status(200).json({ data, totalCount: count });
+        })
+        .catch((countErr) => {
+          console.error(countErr);
+          res.status(500).json({ error: "Failed to count downTimeReasons." });
+        });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(404).json({ err, error: "DownTimeReason not found." });
+    });
 });
 
-// Get one reason
+// Get one downTimeReason
 router.get("/:id", auth, async (req, res) => {
-  const reason = await Reason.findById(req.params.id);
-  res.json(reason);
+  await DownTimeReason.findById(req.params.id)
+    .populate("downTimeCategoryIds")
+    .limit()
+    .then((downTimeReason) => {
+      console.log(downTimeReason);
+      res.status(200).json(downTimeReason);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(404).json({ err, error: "DownTimeReason not found." });
+    });
 });
 
-// Create reason
+// Create downTimeReason
 router.post("/", auth, async (req, res) => {
   const createdById = req.userId;
   const newItem = { ...req.body, createdById };
-  const reason = new Reason(newItem);
-  const savedReason = await reason
+  const downTimeReason = new DownTimeReason(newItem);
+  const savedDownTimeReason = await downTimeReason
     .save()
     .then((data) => {
       res.status(201).json(data);
@@ -37,13 +72,17 @@ router.post("/", auth, async (req, res) => {
     });
 });
 
-// Update reason
+// Update downTimeReason
 router.patch("/:id", auth, async (req, res) => {
   const updatedById = req.userId;
   const updatedData = { ...req.body, updatedById };
-  const updated = await Reason.findByIdAndUpdate(req.params.id, updatedData, {
-    new: true,
-  })
+  const updated = await DownTimeReason.findByIdAndUpdate(
+    req.params.id,
+    updatedData,
+    {
+      new: true,
+    }
+  )
     .then((data) => {
       res.status(201).json(data);
     })
@@ -59,9 +98,9 @@ router.patch("/:id", auth, async (req, res) => {
     });
 });
 
-// Delete reason
+// Delete downTimeReason
 router.delete("/:id", auth, async (req, res) => {
-  await Reason.findByIdAndDelete(req.params.id);
+  await DownTimeReason.findByIdAndDelete(req.params.id);
   res.json({ message: "Deleted" });
 });
 

@@ -16,6 +16,10 @@ const LineCapacitySchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    manpowerPerHr: {
+      type: Number,
+      default: null,
+    },
     isActive: {
       type: Boolean,
       default: true,
@@ -24,10 +28,6 @@ const LineCapacitySchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
-    },
-    updatedById: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
     },
     updatedById: {
       type: mongoose.Schema.Types.ObjectId,

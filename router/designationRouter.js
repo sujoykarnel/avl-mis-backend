@@ -29,7 +29,7 @@ router.get("/:id", auth, async (req, res) => {
     .populate("createdById")
     .limit()
     .then((designation) => {
-      console.log(designation);
+      // console.log(designation);
       res.status(200).json(designation);
     })
     .catch((err) => {

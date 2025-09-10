@@ -211,11 +211,10 @@ router.post("/", auth, async (req, res) => {
   const createdById = req.userId;
   const newItem = { ...req.body, createdById };
   const lineLog = new LineLog(newItem);
-  console.log(newItem, lineLog);
   const savedLineLog = await lineLog
     .save()
     .then((data) => {
-      console.log(data);
+      // console.log(data);
       res.status(201).json(data);
     })
     .catch((err) => {

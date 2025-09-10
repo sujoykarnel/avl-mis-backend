@@ -23,7 +23,7 @@ router.get("/", auth, async (req, res) => {
 
 // Get one unit
 router.get("/:id", auth, async (req, res) => {
-  console.log(req.params.id);
+  
   await Unit.findById(req.params.id)
     .populate()
     .then((unit) => {

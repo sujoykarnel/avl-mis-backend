@@ -5,9 +5,14 @@ const { mongoose } = require("mongoose");
 const { auth } = require("../middlewares/auth");
 
 // Get all capacities
-router.get("/", auth, async (req, res) => {
+router.get("/", auth, (req, res) => {
+  const userRole = req.userRole;
   const search = req.query.search || "";
+  const page = parseInt(req.query.currentPage);
+  const size = parseInt(req.query.rowPerPage);
   let lineIds = req.query.lineIds || [];
+
+  console.log(search);
 
   // Ensure array
   if (typeof lineIds === "string") {
@@ -15,9 +20,10 @@ router.get("/", auth, async (req, res) => {
   }
   const objectLineIds = lineIds.map((id) => new mongoose.Types.ObjectId(id));
 
-  await Capacity.aggregate([
+  const basePipeline = [
     {
       $match: {
+        ...(userRole === "User" ? { isActive: true } : {}),
         lineId: { $in: objectLineIds },
       },
     },
@@ -29,7 +35,7 @@ router.get("/", auth, async (req, res) => {
         as: "line",
       },
     },
-    { $unwind: "$line" },
+    { $unwind: { path: "$line", preserveNullAndEmptyArrays: true } },
     {
       $lookup: {
         from: "lineTypes",
@@ -38,7 +44,7 @@ router.get("/", auth, async (req, res) => {
         as: "lineType",
       },
     },
-    { $unwind: "$lineType" },
+    { $unwind: { path: "$lineType", preserveNullAndEmptyArrays: true } },
     {
       $lookup: {
         from: "units",
@@ -47,7 +53,7 @@ router.get("/", auth, async (req, res) => {
         as: "unit",
       },
     },
-    { $unwind: "$unit" },
+    { $unwind: { path: "$unit", preserveNullAndEmptyArrays: true } },
     {
       $lookup: {
         from: "sections",
@@ -56,7 +62,7 @@ router.get("/", auth, async (req, res) => {
         as: "section",
       },
     },
-    { $unwind: "$section" },
+    { $unwind: { path: "$section", preserveNullAndEmptyArrays: true } },
     {
       $lookup: {
         from: "products",
@@ -65,7 +71,7 @@ router.get("/", auth, async (req, res) => {
         as: "product",
       },
     },
-    { $unwind: "$product" },
+    { $unwind: { path: "$product", preserveNullAndEmptyArrays: true } },
     {
       $lookup: {
         from: "uoms",
@@ -74,8 +80,11 @@ router.get("/", auth, async (req, res) => {
         as: "uom",
       },
     },
-    { $unwind: "$uom" },
-    {
+    { $unwind: { path: "$uom", preserveNullAndEmptyArrays: true } },
+  ];
+
+  if (search) {
+    basePipeline.push({
       $match: {
         $or: [
           { "line.name": { $regex: search, $options: "i" } },
@@ -84,14 +93,30 @@ router.get("/", auth, async (req, res) => {
           { "section.name": { $regex: search, $options: "i" } },
         ],
       },
-    },
+    });
+  }
+
+  let dataPipeline = [];
+
+  if (page >= 0 && size) {
+    dataPipeline = [...basePipeline, { $skip: page * size }, { $limit: size }];
+  } else {
+    dataPipeline = [...basePipeline];
+  }
+
+  const countPipeline = [...basePipeline, { $count: "total" }];
+
+  Promise.all([
+    Capacity.aggregate(dataPipeline),
+    Capacity.aggregate(countPipeline),
   ])
-    .then((capacities) => {
-      res.status(200).json(capacities);
-      // console.log(capacities);
+    .then(([data, countArr]) => {
+      const totalCount = countArr[0]?.total || 0;
+      console.log(data, totalCount);
+      res.status(200).json({ data, totalCount });
     })
     .catch((err) => {
-      onsole.log(err);
+      console.log(err);
       res.status(404).json({ err, error: "Capacities not found." });
     });
 });

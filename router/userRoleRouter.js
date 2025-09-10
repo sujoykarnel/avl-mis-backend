@@ -23,11 +23,11 @@ router.get("/", auth, async (req, res) => {
 
 // Get one userRole
 router.get("/:id", auth, async (req, res) => {
-  console.log(req.params.id);
+  
   await UserRole.findById(req.params.id)
     .populate()
     .then((userRole) => {
-      console.log(userRole);
+      // console.log(userRole);
       res.status(200).json(userRole);
     })
     .catch((err) => {

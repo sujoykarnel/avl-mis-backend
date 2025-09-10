@@ -31,7 +31,7 @@ router.get("/:id", auth, async (req, res) => {
     .populate("createdById")
     .limit()
     .then((department) => {
-      console.log(department);
+      // console.log(department);
       res.status(200).json(department);
     })
     .catch((err) => {

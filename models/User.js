@@ -13,7 +13,7 @@ const UserSchema = new mongoose.Schema(
     enroll: {
       type: Number,
       required: true,
-      min: 100000,
+      min: 1000,
       max: 999999,
     },
     password: {

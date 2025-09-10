@@ -55,7 +55,7 @@ router.get("/", auth, async (req, res) => {
   ])
     .then((lines) => {
       res.status(200).json(lines);
-      console.log(lines);
+      // console.log(lines);
     })
     .catch((err) => {
       onsole.log(err);
@@ -72,7 +72,7 @@ router.get("/:id", auth, async (req, res) => {
     .sort()
     .limit()
     .then((line) => {
-      console.log(line);
+      // console.log(line);
       res.status(200).json(line);
     })
     .catch((err) => {
