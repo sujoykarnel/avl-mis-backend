@@ -155,14 +155,23 @@ router.get("/", async (req, res) => {
 });
 
 // Get one lineLog
-router.get("/:id", auth, async (req, res) => {
+router.get("/:id", async (req, res) => {
   const id = req.params.id;
   const lineLog = await LineLog.aggregate([
     { $match: { _id: new mongoose.Types.ObjectId(id) } },
     {
       $lookup: {
+        from: "lineCapacities",
+        localField: "capacityId",
+        foreignField: "_id",
+        as: "capacity",
+      },
+    },
+    { $unwind: "$capacity" },
+    {
+      $lookup: {
         from: "lines",
-        localField: "lineId",
+        localField: "capacity.lineId",
         foreignField: "_id",
         as: "line",
       },
@@ -179,8 +188,26 @@ router.get("/:id", auth, async (req, res) => {
     { $unwind: "$lineType" },
     {
       $lookup: {
+        from: "units",
+        localField: "line.unitId",
+        foreignField: "_id",
+        as: "unit",
+      },
+    },
+    { $unwind: "$unit" },
+    {
+      $lookup: {
+        from: "sections",
+        localField: "line.sectionId",
+        foreignField: "_id",
+        as: "section",
+      },
+    },
+    { $unwind: "$section" },
+    {
+      $lookup: {
         from: "products",
-        localField: "productId",
+        localField: "capacity.productId",
         foreignField: "_id",
         as: "product",
       },
@@ -195,14 +222,61 @@ router.get("/:id", auth, async (req, res) => {
       },
     },
     { $unwind: "$uom" },
+    {
+      $lookup: {
+        from: "lineOperations",
+        localField: "operationId",
+        foreignField: "_id",
+        as: "operation",
+      },
+    },
+    { $unwind: "$operation" },
+    {
+      $lookup: {
+        from: "downTimeCategories",
+        localField: "downtimeCategoryId",
+        foreignField: "_id",
+        as: "downTimeCategory",
+      },
+    },
+    {
+      $unwind: { path: "$downTimeCategory", preserveNullAndEmptyArrays: true },
+    },
+    {
+      $lookup: {
+        from: "downTimeReasons",
+        localField: "downtimeReasonId",
+        foreignField: "_id",
+        as: "downTimeReason",
+      },
+    },
+    { $unwind: { path: "$downTimeReason", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "innerMachines",
+        localField: "innerMachineId",
+        foreignField: "_id",
+        as: "innerMachine",
+      },
+    },
+    { $unwind: { path: "$innerMachine", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "users",
+        localField: "createdById",
+        foreignField: "_id",
+        as: "createdBy",
+      },
+    },
+    { $unwind: "$createdBy" },
   ])
     .then((lineLog) => {
-      // console.log(lineLog);
       res.status(200).json(lineLog);
+      // console.log(lineLogs);
     })
     .catch((err) => {
-      console.log(err);
-      res.status(404).json({ err, error: "LineLog not found." });
+      onsole.log(err);
+      res.status(404).json({ err, error: "LineLogs not found." });
     });
 });
 
