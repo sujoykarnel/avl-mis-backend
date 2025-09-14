@@ -10,6 +10,8 @@ User.syncIndexes();
 const defaultPassword = "mis";
 const saltRounds = 10;
 
+console.log("hit");
+
 // Get all users
 router.get("/", auth, async (req, res) => {
   const search = req.query.search || "";
@@ -81,10 +83,32 @@ router.patch("/:id", auth, async (req, res) => {
       // Reset to default password
       const hashedPassword = await bcrypt.hash(defaultPassword, saltRounds);
       updatedData.password = hashedPassword;
+      updatedData.isChangedPassword = false;
     } else {
       // Update to provided new password
-      const hashedPassword = await bcrypt.hash(req.body.password, saltRounds);
-      updatedData.password = hashedPassword;
+
+      const user = await User.findById(req.params.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      const comparePassword = await bcrypt.compare(
+        req.body.password,
+        user.password
+      );
+      console.log(comparePassword);
+      if (comparePassword) {
+        const hashedPassword = await bcrypt.hash(
+          req.body.newPassword,
+          saltRounds
+        );
+        updatedData.password = hashedPassword;
+        updatedData.isChangedPassword = true;
+      } else {
+        console.log("pass not match");
+        return res.status(404).json({
+          error: "Current password is incorrect.",
+        });
+      }
     }
   }
 
@@ -104,6 +128,44 @@ router.patch("/:id", auth, async (req, res) => {
         error: "Item not found.",
       });
     });
+});
+
+// Update user password
+router.patch("/:id/updatePassword", async (req, res) => {
+  const updatedById = req.userId;
+  const { currentPassword, newPassword } = req.body;
+  const user = await User.findById(req.params.id);
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+  const comparePassword = await bcrypt.compare(currentPassword, user.password);
+
+  if (comparePassword) {
+    const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
+    console.log("Yes");
+    const updated = await User.findByIdAndUpdate(
+      req.params.id,
+      { password: hashedNewPassword, updatedById, isChangedPassword: true },
+      {
+        new: true,
+      }
+    )
+      .then((data) => {
+        res.status(201).json(data);
+      })
+      .catch((err) => {
+        console.log(err.code);
+        res.status(404).json({
+          err,
+          error: "Current password is incorrect.",
+        });
+      });
+  } else {
+    console.log("No");
+    res.status(404).json({
+      error: "Current password is incorrect.",
+    });
+  }
 });
 
 // Delete user

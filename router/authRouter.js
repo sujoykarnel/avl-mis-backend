@@ -18,6 +18,8 @@ router.post("/login", async (req, res) => {
   const user = await User.findOne({ enroll })
     .populate("roleId")
     .populate("moduleId")
+    .populate("departmentId")
+    .populate("designationId")
     .then(async (user) => {
       if (user) {
         const isValidPassword = await bcrypt.compare(

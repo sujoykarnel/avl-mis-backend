@@ -54,7 +54,7 @@ const UserSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
-    isChangePassword: {
+    isChangedPassword: {
       type: Boolean,
       default: false,
     },

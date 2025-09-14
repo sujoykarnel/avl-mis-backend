@@ -127,7 +127,12 @@ router.get("/", async (req, res) => {
         as: "createdBy",
       },
     },
-    { $unwind: "$createdBy" },
+    { $unwind: { path: "$createdBy", preserveNullAndEmptyArrays: true } },
+    {
+      $project: {
+        "createdBy.password": 0,
+      },
+    },
     {
       $match: {
         "line._id": { $in: objectLineIds },
@@ -268,7 +273,12 @@ router.get("/:id", async (req, res) => {
         as: "createdBy",
       },
     },
-    { $unwind: "$createdBy" },
+    { $unwind: { path: "$createdBy", preserveNullAndEmptyArrays: true } },
+    {
+      $project: {
+        "createdBy.password": 0,
+      },
+    },
   ])
     .then((lineLog) => {
       res.status(200).json(lineLog);
