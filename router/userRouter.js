@@ -15,7 +15,10 @@ console.log("hit");
 // Get all users
 router.get("/", auth, async (req, res) => {
   const search = req.query.search || "";
-  const users = await User.find({
+  const page = parseInt(req.query.currentPage);
+  const size = parseInt(req.query.rowPerPage);
+
+  await User.find({
     name: { $regex: search, $options: "i" },
   })
     .populate("departmentId")
@@ -23,16 +26,25 @@ router.get("/", auth, async (req, res) => {
     .populate("moduleId")
     .populate("roleId")
     .populate("createdById")
-    .limit()
-    .then((users) => {
-      // console.log(sections);
-      res.status(200).json(users);
+    .skip(page * size)
+    .limit(size)
+    .then((data) => {
+      User.countDocuments({ name: { $regex: search, $options: "i" } })
+        .then((count) => {
+          res.status(200).json({ data, totalCount: count });
+        })
+        .catch((countErr) => {
+          console.error(countErr);
+          res.status(500).json({ error: "Failed to count Users." });
+        });
     })
     .catch((err) => {
       console.log(err);
-      res.status(404).json({ err, error: "Section not found." });
+      res.status(404).json({ err, error: "Users not found." });
     });
 });
+
+
 
 // Get one user
 router.get("/:id", auth, async (req, res) => {

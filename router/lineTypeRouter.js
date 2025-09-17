@@ -3,24 +3,32 @@ const router = express.Router();
 const LineType = require("../models/LineType");
 const { auth } = require("../middlewares/auth");
 
-
-
 // Get all lineTypes
 router.get("/", auth, async (req, res) => {
   const search = req.query.search || "";
-  const lineTypes = await LineType.find({
+  const page = parseInt(req.query.currentPage);
+  const size = parseInt(req.query.rowPerPage);
+
+  await LineType.find({
     name: { $regex: search, $options: "i" },
   })
-    .populate()
+    
     .populate("createdById")
-    .limit()
-    .then((lineTypes) => {
-      // console.log(lineTypes);
-      res.status(200).json(lineTypes);
+    .skip(page * size)
+    .limit(size)
+    .then((data) => {
+      LineType.countDocuments({ name: { $regex: search, $options: "i" } })
+        .then((count) => {
+          res.status(200).json({ data, totalCount: count });
+        })
+        .catch((countErr) => {
+          console.error(countErr);
+          res.status(500).json({ error: "Failed to count Line Types." });
+        });
     })
     .catch((err) => {
       console.log(err);
-      res.status(404).json({ err, error: "LineType not found." });
+      res.status(404).json({ err, error: "Line Types not found." });
     });
 });
 

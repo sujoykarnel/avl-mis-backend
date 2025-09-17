@@ -3,24 +3,31 @@ const router = express.Router();
 const Department = require("../models/Department");
 const { auth } = require("../middlewares/auth");
 
-
-
 // Get all departments
 router.get("/", auth, async (req, res) => {
   const search = req.query.search || "";
-  const departments = await Department.find({
+  const page = parseInt(req.query.currentPage);
+  const size = parseInt(req.query.rowPerPage);
+
+  await Department.find({
     name: { $regex: search, $options: "i" },
   })
-    .populate()
     .populate("createdById")
-    .limit()
-    .then((departments) => {
-      // console.log(departments);
-      res.status(200).json(departments);
+    .skip(page * size)
+    .limit(size)
+    .then((data) => {
+      Department.countDocuments({ name: { $regex: search, $options: "i" } })
+        .then((count) => {
+          res.status(200).json({ data, totalCount: count });
+        })
+        .catch((countErr) => {
+          console.error(countErr);
+          res.status(500).json({ error: "Failed to count Departments." });
+        });
     })
     .catch((err) => {
       console.log(err);
-      res.status(404).json({ err, error: "UoMs not found." });
+      res.status(404).json({ err, error: "Departments not found." });
     });
 });
 

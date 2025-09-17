@@ -5,8 +5,30 @@ const { auth } = require("../middlewares/auth");
 
 // Get all innerMachines
 router.get("/", auth, async (req, res) => {
-  const innerMachines = await InnerMachine.find();
-  res.json(innerMachines);
+  const search = req.query.search || "";
+  const page = parseInt(req.query.currentPage);
+  const size = parseInt(req.query.rowPerPage);
+
+  await InnerMachine.find({
+    name: { $regex: search, $options: "i" },
+  })
+    .populate("createdById")
+    .skip(page * size)
+    .limit(size)
+    .then((data) => {
+      InnerMachine.countDocuments({ name: { $regex: search, $options: "i" } })
+        .then((count) => {
+          res.status(200).json({ data, totalCount: count });
+        })
+        .catch((countErr) => {
+          console.error(countErr);
+          res.status(500).json({ error: "Failed to count Inner Machines." });
+        });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(404).json({ err, error: "Inner Machines not found." });
+    });
 });
 
 // Get one innerMachine

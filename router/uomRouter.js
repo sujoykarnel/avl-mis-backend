@@ -1,20 +1,33 @@
 const express = require("express");
 const router = express.Router();
-const Uom = require("../models/UoM");
+const Uom = require("../models/Uom");
 const { auth } = require("../middlewares/auth");
 
 // Get all uoms
 router.get("/", auth, async (req, res) => {
-  await Uom.find()
+  const search = req.query.search || "";
+  const page = parseInt(req.query.currentPage);
+  const size = parseInt(req.query.rowPerPage);
+
+  await Uom.find({
+    name: { $regex: search, $options: "i" },
+  })
     .populate()
-    .limit()
-    .then((uoms) => {
-      console.log(uoms);
-      res.status(200).json({ uoms });
+    .skip(page * size)
+    .limit(size)
+    .then((data) => {
+      Uom.countDocuments({ name: { $regex: search, $options: "i" } })
+        .then((count) => {
+          res.status(200).json({ data, totalCount: count });
+        })
+        .catch((countErr) => {
+          console.error(countErr);
+          res.status(500).json({ error: "Failed to count Uoms." });
+        });
     })
     .catch((err) => {
       console.log(err);
-      res.status(404).json({ err, error: "UoMs not found." });
+      res.status(404).json({ err, error: "Uoms not found." });
     });
 });
 

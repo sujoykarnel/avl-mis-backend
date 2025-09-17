@@ -1,48 +1,57 @@
 const express = require("express");
 const router = express.Router();
-const Operation = require("../models/LineOperation");
+const Material = require("../models/Material");
 const { auth } = require("../middlewares/auth");
 
-// Get all operations
-router.get("/", auth, async (req, res) => {
+// Get all materials
+router.get("/", async (req, res) => {
   const search = req.query.search || "";
   const page = parseInt(req.query.currentPage);
   const size = parseInt(req.query.rowPerPage);
 
-  await Operation.find({
+  const materials = await Material.find({
     name: { $regex: search, $options: "i" },
   })
     .populate()
     .skip(page * size)
     .limit(size)
     .then((data) => {
-      Operation.countDocuments({ name: { $regex: search, $options: "i" } })
-        .then((count) => {
-          res.status(200).json({ data, totalCount: count });
-        })
-        .catch((countErr) => {
-          console.error(countErr);
-          res.status(500).json({ error: "Failed to count Operations." });
-        });
+     Material.countDocuments({ name: { $regex: search, $options: "i" } })
+       .then((count) => {
+         const sendData = { data, totalCount: count };
+         res.status(200).json({ data, totalCount: count });
+       })
+       .catch((countErr) => {
+         console.error(countErr);
+         res.status(500).json({ error: "Failed to count materials." });
+       });
     })
     .catch((err) => {
       console.log(err);
-      res.status(404).json({ err, error: "Operations not found." });
+      res.status(404).json({ err, error: "Item not found." });
     });
 });
 
-// Get one operation
+// Get one material
 router.get("/:id", auth, async (req, res) => {
-  const operation = await Operation.findById(req.params.id);
-  res.json(operation);
+  await Material.findById(req.params.id)
+    .populate()
+    .then((material) => {
+      console.log(material);
+      res.status(200).json(material);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(404).json({ err, error: "Item not found." });
+    });
 });
 
-// Create operation
+// Create material
 router.post("/", auth, async (req, res) => {
   const createdById = req.userId;
   const newItem = { ...req.body, createdById };
-  const operation = new Operation(newItem);
-  const savedOperation = await operation
+  const material = new Material(newItem);
+  const savedMaterial = await material
     .save()
     .then((data) => {
       res.status(201).json(data);
@@ -59,17 +68,13 @@ router.post("/", auth, async (req, res) => {
     });
 });
 
-// Update operation
+// Update material
 router.patch("/:id", auth, async (req, res) => {
   const updatedById = req.userId;
   const updatedData = { ...req.body, updatedById };
-  const updated = await Operation.findByIdAndUpdate(
-    req.params.id,
-    updatedData,
-    {
-      new: true,
-    }
-  )
+  const updated = await Material.findByIdAndUpdate(req.params.id, updatedData, {
+    new: true,
+  })
     .then((data) => {
       res.status(201).json(data);
     })
@@ -85,9 +90,9 @@ router.patch("/:id", auth, async (req, res) => {
     });
 });
 
-// Delete operation
+// Delete material
 router.delete("/:id", auth, async (req, res) => {
-  await Operation.findByIdAndDelete(req.params.id);
+  await Material.findByIdAndDelete(req.params.id);
   res.json({ message: "Deleted" });
 });
 

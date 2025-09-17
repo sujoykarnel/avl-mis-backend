@@ -1,48 +1,57 @@
 const express = require("express");
 const router = express.Router();
-const Operation = require("../models/LineOperation");
+const WastageType = require("../models/WastageType");
 const { auth } = require("../middlewares/auth");
 
-// Get all operations
+// Get all wastageTypes
 router.get("/", auth, async (req, res) => {
   const search = req.query.search || "";
   const page = parseInt(req.query.currentPage);
   const size = parseInt(req.query.rowPerPage);
 
-  await Operation.find({
+  await WastageType.find({
     name: { $regex: search, $options: "i" },
   })
     .populate()
     .skip(page * size)
     .limit(size)
     .then((data) => {
-      Operation.countDocuments({ name: { $regex: search, $options: "i" } })
+      WastageType.countDocuments({ name: { $regex: search, $options: "i" } })
         .then((count) => {
           res.status(200).json({ data, totalCount: count });
         })
         .catch((countErr) => {
           console.error(countErr);
-          res.status(500).json({ error: "Failed to count Operations." });
+          res.status(500).json({ error: "Failed to count Wastage Types." });
         });
     })
     .catch((err) => {
       console.log(err);
-      res.status(404).json({ err, error: "Operations not found." });
+      res.status(404).json({ err, error: "Wastage Types not found." });
     });
 });
 
-// Get one operation
+// Get one wastageType
 router.get("/:id", auth, async (req, res) => {
-  const operation = await Operation.findById(req.params.id);
-  res.json(operation);
+  
+  await WastageType.findById(req.params.id)
+    .populate()
+    .then((wastageType) => {
+      console.log(wastageType);
+      res.status(200).json(wastageType);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(404).json({ err, error: "Item not found." });
+    });
 });
 
-// Create operation
+// Create wastageType
 router.post("/", auth, async (req, res) => {
   const createdById = req.userId;
   const newItem = { ...req.body, createdById };
-  const operation = new Operation(newItem);
-  const savedOperation = await operation
+  const wastageType = new WastageType(newItem);
+  const savedWastageType = await wastageType
     .save()
     .then((data) => {
       res.status(201).json(data);
@@ -59,17 +68,13 @@ router.post("/", auth, async (req, res) => {
     });
 });
 
-// Update operation
+// Update wastageType
 router.patch("/:id", auth, async (req, res) => {
   const updatedById = req.userId;
   const updatedData = { ...req.body, updatedById };
-  const updated = await Operation.findByIdAndUpdate(
-    req.params.id,
-    updatedData,
-    {
-      new: true,
-    }
-  )
+  const updated = await WastageType.findByIdAndUpdate(req.params.id, updatedData, {
+    new: true,
+  })
     .then((data) => {
       res.status(201).json(data);
     })
@@ -85,9 +90,9 @@ router.patch("/:id", auth, async (req, res) => {
     });
 });
 
-// Delete operation
+// Delete wastageType
 router.delete("/:id", auth, async (req, res) => {
-  await Operation.findByIdAndDelete(req.params.id);
+  await WastageType.findByIdAndDelete(req.params.id);
   res.json({ message: "Deleted" });
 });
 

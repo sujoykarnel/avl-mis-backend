@@ -4,13 +4,33 @@ const DownTimeCategory = require("../models/DownTimeCategory");
 const { auth } = require("../middlewares/auth");
 
 // Get all downTimeCategorys
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
   const search = req.query.search || "";
-  console.log("hit");
-  const downTimeCategorys = await DownTimeCategory.find({
+  const page = parseInt(req.query.currentPage);
+  const size = parseInt(req.query.rowPerPage);
+
+  const downTimeCategories = await DownTimeCategory.find({
     name: { $regex: search, $options: "i" },
-  });
-  res.json(downTimeCategorys);
+  })
+    .populate("createdById")
+    .skip(page * size)
+    .limit(size)
+    .then((data) => {
+      DownTimeCategory.countDocuments({
+        name: { $regex: search, $options: "i" },
+      })
+        .then((count) => {
+          res.status(200).json({ data, totalCount: count });
+        })
+        .catch((countErr) => {
+          console.error(countErr);
+          res.status(500).json({ error: "Failed to count DownTimeCategories." });
+        });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(404).json({ err, error: "DownTimeCategories not found." });
+    });
 });
 
 // Get one downTimeCategory

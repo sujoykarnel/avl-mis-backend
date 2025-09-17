@@ -7,6 +7,8 @@ const { auth } = require("../middlewares/auth");
 // Get all lineLogs
 router.get("/", async (req, res) => {
   const search = req.query.search || "";
+  const page = parseInt(req.query.currentPage);
+  const size = parseInt(req.query.rowPerPage);
   let lineIds = req.query.lineId || [];
 
   console.log(lineIds);
@@ -17,7 +19,7 @@ router.get("/", async (req, res) => {
   }
   const objectLineIds = lineIds.map((id) => new mongoose.Types.ObjectId(id));
 
-  await LineLog.aggregate([
+  const basePipeline = [
     {
       $lookup: {
         from: "lineCapacities",
@@ -26,7 +28,17 @@ router.get("/", async (req, res) => {
         as: "capacity",
       },
     },
-    { $unwind: "$capacity" },
+    { $unwind: { path: "$capacity", preserveNullAndEmptyArrays: true } },
+    ...(objectLineIds.length > 0
+      ? [
+          {
+            $match: {
+              "capacity.lineId": { $in: objectLineIds },
+            },
+          },
+        ]
+      : []),
+
     {
       $lookup: {
         from: "lines",
@@ -35,7 +47,7 @@ router.get("/", async (req, res) => {
         as: "line",
       },
     },
-    { $unwind: "$line" },
+    { $unwind: { path: "$line", preserveNullAndEmptyArrays: true } },
     {
       $lookup: {
         from: "lineTypes",
@@ -44,7 +56,7 @@ router.get("/", async (req, res) => {
         as: "lineType",
       },
     },
-    { $unwind: "$lineType" },
+    { $unwind: { path: "$lineType", preserveNullAndEmptyArrays: true } },
     {
       $lookup: {
         from: "units",
@@ -53,7 +65,7 @@ router.get("/", async (req, res) => {
         as: "unit",
       },
     },
-    { $unwind: "$unit" },
+    { $unwind: { path: "$unit", preserveNullAndEmptyArrays: true } },
     {
       $lookup: {
         from: "sections",
@@ -62,7 +74,7 @@ router.get("/", async (req, res) => {
         as: "section",
       },
     },
-    { $unwind: "$section" },
+    { $unwind: { path: "$section", preserveNullAndEmptyArrays: true } },
     {
       $lookup: {
         from: "products",
@@ -71,7 +83,7 @@ router.get("/", async (req, res) => {
         as: "product",
       },
     },
-    { $unwind: "$product" },
+    { $unwind: { path: "$product", preserveNullAndEmptyArrays: true } },
     {
       $lookup: {
         from: "uoms",
@@ -80,7 +92,7 @@ router.get("/", async (req, res) => {
         as: "uom",
       },
     },
-    { $unwind: "$uom" },
+    { $unwind: { path: "$uom", preserveNullAndEmptyArrays: true } },
     {
       $lookup: {
         from: "lineOperations",
@@ -89,7 +101,7 @@ router.get("/", async (req, res) => {
         as: "operation",
       },
     },
-    { $unwind: "$operation" },
+    { $unwind: { path: "$operation", preserveNullAndEmptyArrays: true } },
     {
       $lookup: {
         from: "downTimeCategories",
@@ -133,12 +145,10 @@ router.get("/", async (req, res) => {
         "createdBy.password": 0,
       },
     },
-    {
-      $match: {
-        "line._id": { $in: objectLineIds },
-      },
-    },
-    {
+  ];
+
+  if (search) {
+    basePipeline.push({
       $match: {
         $or: [
           { "line.name": { $regex: search, $options: "i" } },
@@ -147,15 +157,32 @@ router.get("/", async (req, res) => {
           { "section.name": { $regex: search, $options: "i" } },
         ],
       },
-    },
+    });
+  }
+
+  let dataPipeline = [];
+
+  if (page >= 0 && size) {
+    dataPipeline = [...basePipeline, { $skip: page * size }, { $limit: size }];
+  } else {
+    dataPipeline = [...basePipeline];
+  }
+
+  const countPipeline = [...basePipeline, { $count: "total" }];
+
+  Promise.all([
+    LineLog.aggregate(dataPipeline),
+    LineLog.aggregate(countPipeline),
   ])
-    .then((lineLogs) => {
-      res.status(200).json(lineLogs);
-      // console.log(lineLogs);
+    .then(([data, countArr]) => {
+      const totalCount = countArr[0]?.total || 0;
+      // console.log(data, totalCount);
+      console.log("hit");
+      res.status(200).json({ data, totalCount });
     })
     .catch((err) => {
-      onsole.log(err);
-      res.status(404).json({ err, error: "LineLogs not found." });
+      console.log(err);
+      res.status(404).json({ err, error: "LineLog not found." });
     });
 });
 

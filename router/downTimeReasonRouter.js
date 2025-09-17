@@ -6,12 +6,16 @@ const { auth } = require("../middlewares/auth");
 // Get all downTimeReasons
 router.get("/", auth, (req, res) => {
   const userRole = req.userRole;
+  const downTimeCategoryId = req.query.downTimeCategoryId || "";
   const search = req.query.search || "";
   const page = parseInt(req.query.currentPage);
   const size = parseInt(req.query.rowPerPage);
   console.log(req);
   DownTimeReason.find({
     ...(userRole === "User" ? { isActive: true } : {}),
+    ...(downTimeCategoryId
+      ? { downTimeCategoryIds: { $in: [downTimeCategoryId] } }
+      : {}),
     name: { $regex: search, $options: "i" },
   })
     .populate("downTimeCategoryIds")
@@ -21,7 +25,6 @@ router.get("/", auth, (req, res) => {
     .then((data) => {
       DownTimeReason.countDocuments({ name: { $regex: search, $options: "i" } })
         .then((count) => {
-          const sendData = { data, totalCount: count };
           res.status(200).json({ data, totalCount: count });
         })
         .catch((countErr) => {

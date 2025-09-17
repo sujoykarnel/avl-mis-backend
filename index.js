@@ -26,6 +26,9 @@ const designationRouter = require("./router/designationRouter");
 const authRouter = require("./router/authRouter");
 const userRoleRouter = require("./router/userRoleRouter");
 const lineLogRouter = require("./router/lineLogRouter");
+const wastageTypeRouter = require("./router/wastageTypeRouter");
+const materialRouter = require("./router/materialRouter");
+const wastageItemRouter = require("./router/wastageItemRouter");
 
 const app = express();
 app.use(express.json());
@@ -65,6 +68,9 @@ app.use("/api/designations", designationRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/userRoles", userRoleRouter);
 app.use("/api/lineLogs", lineLogRouter);
+app.use("/api/wastageTypes", wastageTypeRouter);
+app.use("/api/materials", materialRouter);
+app.use("/api/wastageItems", wastageItemRouter);
 
 // Start server
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

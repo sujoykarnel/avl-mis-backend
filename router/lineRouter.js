@@ -4,9 +4,12 @@ const Line = require("../models/Line");
 const { auth } = require("../middlewares/auth");
 
 // Get all lines
-router.get("/", auth, async (req, res) => {
+router.get("/", async (req, res) => {
   const search = req.query.search || "";
-  await Line.aggregate([
+  const page = parseInt(req.query.currentPage);
+  const size = parseInt(req.query.rowPerPage);
+
+  const basePipeline = [
     {
       $lookup: {
         from: "units",
@@ -35,6 +38,17 @@ router.get("/", auth, async (req, res) => {
     },
     { $unwind: "$lineType" },
     {
+      $sort: {
+        "unit.name": 1,
+        "section.name": 1,
+        name: 1,
+        "lineType.name": 1,
+      },
+    },
+  ];
+
+  if (search) {
+    basePipeline.push({
       $match: {
         $or: [
           { name: { $regex: search, $options: "i" } },
@@ -43,22 +57,26 @@ router.get("/", auth, async (req, res) => {
           { "section.name": { $regex: search, $options: "i" } },
         ],
       },
-    },
-    {
-      $sort: {
-        "unit.name": 1,
-        "section.name": 1,
-        name: 1,
-        "lineType.name": 1,
-      },
-    },
-  ])
-    .then((lines) => {
-      res.status(200).json(lines);
-      // console.log(lines);
+    });
+  }
+
+  let dataPipeline = [];
+
+  if (page >= 0 && size) {
+    dataPipeline = [...basePipeline, { $skip: page * size }, { $limit: size }];
+  } else {
+    dataPipeline = [...basePipeline];
+  }
+
+  const countPipeline = [...basePipeline, { $count: "total" }];
+
+  Promise.all([Line.aggregate(dataPipeline), Line.aggregate(countPipeline)])
+    .then(([data, countArr]) => {
+      const totalCount = countArr[0]?.total || 0;
+      res.status(200).json({ data, totalCount });
     })
     .catch((err) => {
-      onsole.log(err);
+      console.log(err);
       res.status(404).json({ err, error: "Capacities not found." });
     });
 });

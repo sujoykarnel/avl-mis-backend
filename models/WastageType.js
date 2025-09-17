@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const UnitSchema = new mongoose.Schema(
+const WastageTypeSchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -23,13 +23,13 @@ const UnitSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-    collection: "units",
+    collection: "wastageTypes",
   }
 );
 
-const Unit = mongoose.model("Unit", UnitSchema);
+const WastageType = mongoose.model("WastageType", WastageTypeSchema);
 
 // sync indexes
-Unit.syncIndexes();
+WastageType.syncIndexes();
 
-module.exports = Unit;
+module.exports = WastageType;

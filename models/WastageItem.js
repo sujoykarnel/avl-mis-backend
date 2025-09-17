@@ -1,47 +1,25 @@
 const mongoose = require("mongoose");
 
-// nasted wastage schima
-const wastageSchima = new mongoose.Schema({
-  wastageItemId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "WastageItem",
-    required: true,
-  },
-  usedQty: {
-    type: Number,
-    required: true,
-    min: 0,
-  },
-  wasteQty: {
-    type: Number,
-    required: true,
-    min: 0,
-  },
-});
-
-const productSchema = new mongoose.Schema(
+const WastageItemSchema = new mongoose.Schema(
   {
     name: {
       type: String,
       required: true,
       unique: true,
     },
-    sku: {
-      type: Number,
-      required: true,
-    },
-    primaryUomId: {
+    uomId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Uom",
       required: true,
     },
-    secondaryUomId: {
+    wastageTypeId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Uom",
+      ref: "WastageType",
       required: true,
     },
-    primaryPerSeconsary: {
-      type: Number,
+    materialId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Material",
       required: true,
     },
     isActive: {
@@ -60,12 +38,13 @@ const productSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
+    collection: "wastageItems",
   }
 );
 
-const Product = mongoose.model("Product", productSchema);
+const WastageItem = mongoose.model("WastageItem", WastageItemSchema);
 
 // sync indexes
-Product.syncIndexes();
+WastageItem.syncIndexes();
 
-module.exports = Product;
+module.exports = WastageItem;

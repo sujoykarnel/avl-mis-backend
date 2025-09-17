@@ -6,18 +6,28 @@ const { auth } = require("../middlewares/auth");
 // Get all units
 router.get("/", auth, async (req, res) => {
   const search = req.query.search || "";
-  const units = await Unit.find({
+  const page = parseInt(req.query.currentPage);
+  const size = parseInt(req.query.rowPerPage);
+
+  await Unit.find({
     name: { $regex: search, $options: "i" },
   })
     .populate()
-    .limit()
-    .then((units) => {
-      // console.log(units);
-      res.status(200).json(units);
+    .skip(page * size)
+    .limit(size)
+    .then((data) => {
+      Unit.countDocuments({ name: { $regex: search, $options: "i" } })
+        .then((count) => {
+          res.status(200).json({ data, totalCount: count });
+        })
+        .catch((countErr) => {
+          console.error(countErr);
+          res.status(500).json({ error: "Failed to count Units." });
+        });
     })
     .catch((err) => {
       console.log(err);
-      res.status(404).json({ err, error: "Item not found." });
+      res.status(404).json({ err, error: "Units not found." });
     });
 });
 

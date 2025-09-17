@@ -112,7 +112,6 @@ router.get("/", auth, (req, res) => {
   ])
     .then(([data, countArr]) => {
       const totalCount = countArr[0]?.total || 0;
-      console.log(data, totalCount);
       res.status(200).json({ data, totalCount });
     })
     .catch((err) => {

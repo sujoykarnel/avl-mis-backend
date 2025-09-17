@@ -6,18 +6,28 @@ const { auth } = require("../middlewares/auth");
 // Get all userRoles
 router.get("/", auth, async (req, res) => {
   const search = req.query.search || "";
-  const userRoles = await UserRole.find({
+  const page = parseInt(req.query.currentPage);
+  const size = parseInt(req.query.rowPerPage);
+
+  await UserRole.find({
     name: { $regex: search, $options: "i" },
   })
     .populate()
-    .limit()
-    .then((userRoles) => {
-      // console.log(userRoles);
-      res.status(200).json(userRoles);
+    .skip(page * size)
+    .limit(size)
+    .then((data) => {
+      UserRole.countDocuments({ name: { $regex: search, $options: "i" } })
+        .then((count) => {
+          res.status(200).json({ data, totalCount: count });
+        })
+        .catch((countErr) => {
+          console.error(countErr);
+          res.status(500).json({ error: "Failed to count User Roles." });
+        });
     })
     .catch((err) => {
       console.log(err);
-      res.status(404).json({ err, error: "Item not found." });
+      res.status(404).json({ err, error: "User Roles not found." });
     });
 });
 

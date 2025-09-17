@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const UnitSchema = new mongoose.Schema(
+const MaterialSchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -23,13 +23,16 @@ const UnitSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-    collection: "units",
+    collection: "materials",
   }
 );
 
-const Unit = mongoose.model("Unit", UnitSchema);
+const Material = mongoose.model(
+  "Material",
+  MaterialSchema
+);
 
 // sync indexes
-Unit.syncIndexes();
+Material.syncIndexes();
 
-module.exports = Unit;
+module.exports = Material;

@@ -6,15 +6,25 @@ const { auth } = require("../middlewares/auth");
 // Get all designations
 router.get("/", auth, async (req, res) => {
   const search = req.query.search || "";
-  const designations = await Designation.find({
+  const page = parseInt(req.query.currentPage) || null;
+  const size = parseInt(req.query.rowPerPage) || null;
+
+  const designation = await Designation.find({
     name: { $regex: search, $options: "i" },
   })
-    .populate()
     .populate("createdById")
-    .limit()
-    .then((designations) => {
-      // console.log(designations);
-      res.status(200).json(designations);
+    .skip(page * size)
+    .limit(size)
+    .then((data) => {
+      console.log(data);
+      Designation.countDocuments({ name: { $regex: search, $options: "i" } })
+        .then((count) => {
+          res.status(200).json({ data, totalCount: count });
+        })
+        .catch((countErr) => {
+          console.error(countErr);
+          res.status(500).json({ error: "Failed to count departments." });
+        });
     })
     .catch((err) => {
       console.log(err);
