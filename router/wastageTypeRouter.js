@@ -33,11 +33,9 @@ router.get("/", auth, async (req, res) => {
 
 // Get one wastageType
 router.get("/:id", auth, async (req, res) => {
-  
   await WastageType.findById(req.params.id)
     .populate()
     .then((wastageType) => {
-      console.log(wastageType);
       res.status(200).json(wastageType);
     })
     .catch((err) => {
@@ -72,9 +70,13 @@ router.post("/", auth, async (req, res) => {
 router.patch("/:id", auth, async (req, res) => {
   const updatedById = req.userId;
   const updatedData = { ...req.body, updatedById };
-  const updated = await WastageType.findByIdAndUpdate(req.params.id, updatedData, {
-    new: true,
-  })
+  const updated = await WastageType.findByIdAndUpdate(
+    req.params.id,
+    updatedData,
+    {
+      new: true,
+    }
+  )
     .then((data) => {
       res.status(201).json(data);
     })

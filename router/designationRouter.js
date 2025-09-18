@@ -16,7 +16,7 @@ router.get("/", auth, async (req, res) => {
     .skip(page * size)
     .limit(size)
     .then((data) => {
-      console.log(data);
+      
       Designation.countDocuments({ name: { $regex: search, $options: "i" } })
         .then((count) => {
           res.status(200).json({ data, totalCount: count });
@@ -74,7 +74,6 @@ router.post("/", auth, async (req, res) => {
 router.patch("/:id", auth, async (req, res) => {
   const updatedById = req.userId;
   const updatedData = { ...req.body, updatedById };
-  console.log(req.params.id, req.body);
   const updated = await Designation.findByIdAndUpdate(
     req.params.id,
     updatedData,

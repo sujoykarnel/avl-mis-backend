@@ -12,19 +12,19 @@ router.get("/", async (req, res) => {
   const materials = await Material.find({
     name: { $regex: search, $options: "i" },
   })
-    .populate()
+    .populate("uomId")
     .skip(page * size)
     .limit(size)
     .then((data) => {
-     Material.countDocuments({ name: { $regex: search, $options: "i" } })
-       .then((count) => {
-         const sendData = { data, totalCount: count };
-         res.status(200).json({ data, totalCount: count });
-       })
-       .catch((countErr) => {
-         console.error(countErr);
-         res.status(500).json({ error: "Failed to count materials." });
-       });
+      Material.countDocuments({ name: { $regex: search, $options: "i" } })
+        .then((count) => {
+          const sendData = { data, totalCount: count };
+          res.status(200).json({ data, totalCount: count });
+        })
+        .catch((countErr) => {
+          console.error(countErr);
+          res.status(500).json({ error: "Failed to count materials." });
+        });
     })
     .catch((err) => {
       console.log(err);
@@ -35,7 +35,7 @@ router.get("/", async (req, res) => {
 // Get one material
 router.get("/:id", auth, async (req, res) => {
   await Material.findById(req.params.id)
-    .populate()
+    .populate("uomId")
     .then((material) => {
       console.log(material);
       res.status(200).json(material);

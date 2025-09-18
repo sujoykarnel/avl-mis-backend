@@ -1,24 +1,5 @@
 const mongoose = require("mongoose");
 
-// nasted wastage schima
-const wastageSchima = new mongoose.Schema({
-  wastageItemId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "WastageItem",
-    required: true,
-  },
-  usedQty: {
-    type: Number,
-    required: true,
-    min: 0,
-  },
-  wasteQty: {
-    type: Number,
-    required: true,
-    min: 0,
-  },
-});
-
 const productSchema = new mongoose.Schema(
   {
     name: {

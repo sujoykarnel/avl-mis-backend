@@ -29,6 +29,7 @@ const lineLogRouter = require("./router/lineLogRouter");
 const wastageTypeRouter = require("./router/wastageTypeRouter");
 const materialRouter = require("./router/materialRouter");
 const wastageItemRouter = require("./router/wastageItemRouter");
+const wastageAssignItemRouter = require("./router/wastageAssignItemRouter");
 
 const app = express();
 app.use(express.json());
@@ -71,6 +72,7 @@ app.use("/api/lineLogs", lineLogRouter);
 app.use("/api/wastageTypes", wastageTypeRouter);
 app.use("/api/materials", materialRouter);
 app.use("/api/wastageItems", wastageItemRouter);
+app.use("/api/wastageAssignItems", wastageAssignItemRouter);
 
 // Start server
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

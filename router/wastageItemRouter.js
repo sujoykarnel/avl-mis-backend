@@ -12,9 +12,7 @@ router.get("/", async (req, res) => {
   await WastageItem.find({
     name: { $regex: search, $options: "i" },
   })
-    .populate("uomId")
-    .populate("wastageTypeId")
-    .populate("materialId")
+    .populate()
     .skip(page * size)
     .limit(size)
     .then((data) => {
@@ -38,7 +36,7 @@ router.get("/:id", auth, async (req, res) => {
   await WastageItem.findById(req.params.id)
     .populate()
     .then((wastageItem) => {
-      console.log(wastageItem);
+      
       res.status(200).json(wastageItem);
     })
     .catch((err) => {

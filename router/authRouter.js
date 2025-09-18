@@ -34,7 +34,7 @@ router.post("/login", async (req, res) => {
             enroll,
             role: roleId?.name,
           };
-          console.log(userData);
+          
           const token = jwt.sign(userData, process.env.JWT_SECRET, {
             expiresIn: "8h",
           });

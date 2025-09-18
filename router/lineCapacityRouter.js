@@ -12,7 +12,6 @@ router.get("/", auth, (req, res) => {
   const size = parseInt(req.query.rowPerPage);
   let lineIds = req.query.lineIds || [];
 
-  console.log(search);
 
   // Ensure array
   if (typeof lineIds === "string") {

@@ -10,7 +10,8 @@ router.get("/", auth, (req, res) => {
   const search = req.query.search || "";
   const page = parseInt(req.query.currentPage);
   const size = parseInt(req.query.rowPerPage);
-  console.log(req);
+
+  
   DownTimeReason.find({
     ...(userRole === "User" ? { isActive: true } : {}),
     ...(downTimeCategoryId
@@ -44,7 +45,6 @@ router.get("/:id", auth, async (req, res) => {
     .populate("downTimeCategoryIds")
     .limit()
     .then((downTimeReason) => {
-      console.log(downTimeReason);
       res.status(200).json(downTimeReason);
     })
     .catch((err) => {

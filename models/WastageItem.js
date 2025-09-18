@@ -7,21 +7,7 @@ const WastageItemSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
-    uomId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Uom",
-      required: true,
-    },
-    wastageTypeId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "WastageType",
-      required: true,
-    },
-    materialId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Material",
-      required: true,
-    },
+    
     isActive: {
       type: Boolean,
       default: true,

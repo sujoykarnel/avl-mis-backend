@@ -10,7 +10,6 @@ User.syncIndexes();
 const defaultPassword = "mis";
 const saltRounds = 10;
 
-console.log("hit");
 
 // Get all users
 router.get("/", auth, async (req, res) => {
@@ -107,7 +106,7 @@ router.patch("/:id", auth, async (req, res) => {
         req.body.password,
         user.password
       );
-      console.log(comparePassword);
+      
       if (comparePassword) {
         const hashedPassword = await bcrypt.hash(
           req.body.newPassword,
@@ -116,7 +115,7 @@ router.patch("/:id", auth, async (req, res) => {
         updatedData.password = hashedPassword;
         updatedData.isChangedPassword = true;
       } else {
-        console.log("pass not match");
+        
         return res.status(404).json({
           error: "Current password is incorrect.",
         });
@@ -154,7 +153,7 @@ router.patch("/:id/updatePassword", async (req, res) => {
 
   if (comparePassword) {
     const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
-    console.log("Yes");
+    
     const updated = await User.findByIdAndUpdate(
       req.params.id,
       { password: hashedNewPassword, updatedById, isChangedPassword: true },
@@ -173,7 +172,7 @@ router.patch("/:id/updatePassword", async (req, res) => {
         });
       });
   } else {
-    console.log("No");
+    
     res.status(404).json({
       error: "Current password is incorrect.",
     });

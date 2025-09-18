@@ -1,5 +1,37 @@
 const mongoose = require("mongoose");
 
+//  nasted wastage qty schima
+const wastageQtySchema = new mongoose.Schema({
+  wastageItemId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "WastageItem",
+    required: true,
+  },
+
+  wasteQty: {
+    type: Number,
+    required: true,
+    min: 0,
+    default: 0,
+  },
+});
+
+//  nasted wastage qty schima
+const wastageSchema = new mongoose.Schema({
+  materialId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "WastageItem",
+    required: true,
+  },
+  usedQty: {
+    type: Number,
+    required: true,
+    min: 0,
+    default: 0,
+  },
+  waste: [wastageQtySchema],
+});
+
 const LineLogSchema = new mongoose.Schema(
   {
     capacityId: {
@@ -60,6 +92,7 @@ const LineLogSchema = new mongoose.Schema(
       default: "",
       trim: true,
     },
+    wastage: [wastageSchema],
     isActive: {
       type: Boolean,
       default: true,

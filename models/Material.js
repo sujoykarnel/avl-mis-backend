@@ -5,7 +5,11 @@ const MaterialSchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
-      unique: true,
+    },
+    uomId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Uom",
+      required: true,
     },
     isActive: {
       type: Boolean,
@@ -27,10 +31,9 @@ const MaterialSchema = new mongoose.Schema(
   }
 );
 
-const Material = mongoose.model(
-  "Material",
-  MaterialSchema
-);
+MaterialSchema.index({ name: 1, uomId: 1 }, { unique: true });
+
+const Material = mongoose.model("Material", MaterialSchema);
 
 // sync indexes
 Material.syncIndexes();

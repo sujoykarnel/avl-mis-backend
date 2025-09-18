@@ -29,6 +29,7 @@ const WastageTypeSchema = new mongoose.Schema(
 
 const WastageType = mongoose.model("WastageType", WastageTypeSchema);
 
+
 // sync indexes
 WastageType.syncIndexes();
 
