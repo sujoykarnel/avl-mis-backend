@@ -1,36 +1,47 @@
 const mongoose = require("mongoose");
 
 //  nasted wastage qty schima
-const wastageQtySchema = new mongoose.Schema({
-  wastageItemId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "WastageItem",
-    required: true,
-  },
+const wastageQtySchema = new mongoose.Schema(
+  {
+    wastageItemId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "WastageItem",
+      required: true,
+    },
 
-  wasteQty: {
-    type: Number,
-    required: true,
-    min: 0,
-    default: 0,
+    wasteQty: {
+      type: Number,
+      required: true,
+      min: 0,
+      default: 0,
+    },
   },
-});
+  { _id: false }
+);
 
 //  nasted wastage qty schima
-const wastageSchema = new mongoose.Schema({
-  materialId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "WastageItem",
-    required: true,
+const wastageSchema = new mongoose.Schema(
+  {
+    wastageTypeId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "WastageType",
+      required: true,
+    },
+    materialId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "WastageItem",
+      required: true,
+    },
+    usedQty: {
+      type: Number,
+      required: true,
+      min: 0,
+      default: 0,
+    },
+    waste: [wastageQtySchema],
   },
-  usedQty: {
-    type: Number,
-    required: true,
-    min: 0,
-    default: 0,
-  },
-  waste: [wastageQtySchema],
-});
+  { _id: false }
+);
 
 const LineLogSchema = new mongoose.Schema(
   {

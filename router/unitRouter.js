@@ -12,7 +12,8 @@ router.get("/", auth, async (req, res) => {
   await Unit.find({
     name: { $regex: search, $options: "i" },
   })
-    .populate()
+    .populate("createdById")
+    // .populate({ path: "createdById.createdById", model: "User" })
     .skip(page * size)
     .limit(size)
     .then((data) => {
@@ -33,11 +34,11 @@ router.get("/", auth, async (req, res) => {
 
 // Get one unit
 router.get("/:id", auth, async (req, res) => {
-  
   await Unit.findById(req.params.id)
-    .populate()
+    .populate("createdById")
+
     .then((unit) => {
-      console.log(unit);
+      // console.log(unit);
       res.status(200).json(unit);
     })
     .catch((err) => {

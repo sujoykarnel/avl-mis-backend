@@ -2,21 +2,31 @@ const express = require("express");
 const router = express.Router();
 const WastageAssignItem = require("../models/WastageAssignItem");
 const { auth } = require("../middlewares/auth");
+const { default: mongoose } = require("mongoose");
 
 // Get all wastageAssignItems
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
+  const userRole = req.userRole;
   const search = req.query.search || "";
   const page = parseInt(req.query.currentPage);
   const size = parseInt(req.query.rowPerPage);
-  let lineIds = req.query.lineId || [];
+  let unitIds = req.query.unitId || [];
+
+  console.log(unitIds);
 
   // Ensure array
-  if (typeof lineIds === "string") {
-    lineIds = lineIds.split(",");
+  if (typeof unitIds === "string") {
+    unitIds = unitIds.split(",");
   }
-  const objectLineIds = lineIds.map((id) => new mongoose.Types.ObjectId(id));
+  const objectUnitIds = unitIds.map((id) => new mongoose.Types.ObjectId(id));
 
   const basePipeline = [
+    {
+      $match: {
+        ...(userRole === "User" ? { isActive: true } : {}),
+        ...(objectUnitIds.length > 0 ? { unitId: { $in: objectUnitIds } } : {}),
+      },
+    },
     {
       $lookup: {
         from: "units",
@@ -93,8 +103,22 @@ router.get("/", async (req, res) => {
 
   let dataPipeline = [];
 
+  const sortStage = {
+    $sort: {
+      "unit.name": 1,
+      "wastageType.name": 1,
+      "material.name": 1,
+      "wastageItem.name": 1,
+    },
+  };
+
   if (page >= 0 && size) {
-    dataPipeline = [...basePipeline, { $skip: page * size }, { $limit: size }];
+    dataPipeline = [
+      ...basePipeline,
+      sortStage,
+      { $skip: page * size },
+      { $limit: size },
+    ];
   } else {
     dataPipeline = [...basePipeline];
   }
@@ -108,7 +132,7 @@ router.get("/", async (req, res) => {
     .then(([data, countArr]) => {
       const totalCount = countArr[0]?.total || 0;
       // console.log(data, totalCount);
-      
+
       res.status(200).json({ data, totalCount });
     })
     .catch((err) => {
@@ -119,10 +143,70 @@ router.get("/", async (req, res) => {
 
 // Get one wastageAssignItem
 router.get("/:id", auth, async (req, res) => {
-  await WastageAssignItem.findById(req.params.id)
-    .populate()
+  const id = req.params.id;
+  const wastageAssignItem = await WastageAssignItem.aggregate([
+    { $match: { _id: new mongoose.Types.ObjectId(id) } },
+    {
+      $lookup: {
+        from: "units",
+        localField: "unitId",
+        foreignField: "_id",
+        as: "unit",
+      },
+    },
+    { $unwind: { path: "$unit", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "wastageTypes",
+        localField: "wastageTypeId",
+        foreignField: "_id",
+        as: "wastageType",
+      },
+    },
+    { $unwind: { path: "$wastageType", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "materials",
+        localField: "materialId",
+        foreignField: "_id",
+        as: "material",
+      },
+    },
+    { $unwind: { path: "$material", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "uoms",
+        localField: "material.uomId",
+        foreignField: "_id",
+        as: "uom",
+      },
+    },
+    { $unwind: { path: "$uom", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "wastageItems",
+        localField: "wastageItemId",
+        foreignField: "_id",
+        as: "wastageItem",
+      },
+    },
+    { $unwind: { path: "$wastageItem", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "users",
+        localField: "createdById",
+        foreignField: "_id",
+        as: "createdBy",
+      },
+    },
+    { $unwind: { path: "$createdBy", preserveNullAndEmptyArrays: true } },
+    {
+      $project: {
+        "createdBy.password": 0,
+      },
+    },
+  ])
     .then((wastageAssignItem) => {
-      
       res.status(200).json(wastageAssignItem);
     })
     .catch((err) => {
@@ -144,7 +228,7 @@ router.post("/", auth, async (req, res) => {
     .catch((err) => {
       console.log(err.code);
       if (err.code === 11000) {
-        res.status(409).json({ err, error: "Duplicate" });
+        return res.status(409).json({ err, error: "Duplicate" });
       }
       res.status(404).json({
         err,
@@ -170,7 +254,7 @@ router.patch("/:id", auth, async (req, res) => {
     .catch((err) => {
       console.log(err.code);
       if (err.code === 11000) {
-        res.status(409).json({ err, error: "Duplicate" });
+        res.status(201).json({ err, error: "Duplicate" });
       }
       res.status(404).json({
         err,

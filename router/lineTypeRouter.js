@@ -12,7 +12,7 @@ router.get("/", auth, async (req, res) => {
   await LineType.find({
     name: { $regex: search, $options: "i" },
   })
-    
+
     .populate("createdById")
     .skip(page * size)
     .limit(size)

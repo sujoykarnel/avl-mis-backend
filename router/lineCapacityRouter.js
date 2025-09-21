@@ -12,7 +12,6 @@ router.get("/", auth, (req, res) => {
   const size = parseInt(req.query.rowPerPage);
   let lineIds = req.query.lineIds || [];
 
-
   // Ensure array
   if (typeof lineIds === "string") {
     lineIds = lineIds.split(",");
@@ -97,8 +96,23 @@ router.get("/", auth, (req, res) => {
 
   let dataPipeline = [];
 
+  const sortStage = {
+    $sort: {
+      "unit.name": 1,
+      "section.name": 1,
+      "line.name": 1,
+      "lineType.name": 1,
+      "product.name": 1,
+    },
+  };
+
   if (page >= 0 && size) {
-    dataPipeline = [...basePipeline, { $skip: page * size }, { $limit: size }];
+    dataPipeline = [
+      ...basePipeline,
+      sortStage,
+      { $skip: page * size },
+      { $limit: size },
+    ];
   } else {
     dataPipeline = [...basePipeline];
   }

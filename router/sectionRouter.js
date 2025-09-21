@@ -73,7 +73,6 @@ router.post("/", auth, async (req, res) => {
 router.patch("/:id", auth, async (req, res) => {
   const updatedById = req.userId;
   const updatedData = { ...req.body, updatedById };
-  console.log(req.params.id, req.body);
   const updated = await Section.findByIdAndUpdate(req.params.id, updatedData, {
     new: true,
   })
