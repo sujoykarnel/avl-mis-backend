@@ -4,20 +4,25 @@ const LineLog = require("../models/LineLog");
 const { mongoose } = require("mongoose");
 const { auth } = require("../middlewares/auth");
 
+// text helper
+const escapeRegex = (text) => {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+};
+
 // Get all lineLogs
 router.get("/", async (req, res) => {
+  const userRole = req.userRole;
   const search = req.query.search || "";
   const page = parseInt(req.query.currentPage);
   const size = parseInt(req.query.rowPerPage);
-  let lineIds = req.query.lineId || [];
-
-  console.log(lineIds);
+  let lineIds = req.query.lineIds || [];
 
   // Ensure array
   if (typeof lineIds === "string") {
     lineIds = lineIds.split(",");
   }
   const objectLineIds = lineIds.map((id) => new mongoose.Types.ObjectId(id));
+  // console.log(objectLineIds);
 
   const basePipeline = [
     {
@@ -89,10 +94,19 @@ router.get("/", async (req, res) => {
         from: "uoms",
         localField: "product.primaryUomId",
         foreignField: "_id",
-        as: "uom",
+        as: "primaryUom",
       },
     },
-    { $unwind: { path: "$uom", preserveNullAndEmptyArrays: true } },
+    { $unwind: { path: "$primaryUom", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "uoms",
+        localField: "product.secondaryUomId",
+        foreignField: "_id",
+        as: "secondaryUom",
+      },
+    },
+    { $unwind: { path: "$secondaryUom", preserveNullAndEmptyArrays: true } },
     {
       $lookup: {
         from: "lineOperations",
@@ -148,13 +162,15 @@ router.get("/", async (req, res) => {
   ];
 
   if (search) {
+    const safeSearch = escapeRegex(search);
+
     basePipeline.push({
       $match: {
         $or: [
-          { "line.name": { $regex: search, $options: "i" } },
-          { "product.name": { $regex: search, $options: "i" } },
-          { "unit.name": { $regex: search, $options: "i" } },
-          { "section.name": { $regex: search, $options: "i" } },
+          { "line.name": { $regex: safeSearch, $options: "i" } },
+          { "product.name": { $regex: safeSearch, $options: "i" } },
+          { "unit.name": { $regex: safeSearch, $options: "i" } },
+          { "section.name": { $regex: safeSearch, $options: "i" } },
         ],
       },
     });

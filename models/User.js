@@ -9,22 +9,24 @@ const UserSchema = new mongoose.Schema(
     frNo: {
       type: String,
       required: true,
+      unique: true,
     },
     enroll: {
       type: Number,
       required: true,
       min: 1000,
       max: 999999,
+      unique: true,
     },
     password: {
       type: String,
       required: true,
-      default: "avlmis",
     },
     mobileNo: {
       type: String,
       required: true,
       match: [/^01[3-9]\d{8}$/, "Please enter a valid mobile number"],
+      unique: true,
     },
     departmentId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -72,8 +74,6 @@ const UserSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
-
-UserSchema.index({ frNo: 1, enroll: 1, mobileNo: 1 }, { unique: true });
 
 const User = mongoose.model("User", UserSchema);
 

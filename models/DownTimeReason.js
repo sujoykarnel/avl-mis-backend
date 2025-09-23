@@ -47,15 +47,15 @@ const getNextCode = (seqName, prefix, width) => {
   ).then((counter) => `${prefix}${String(counter.seq).padStart(width, "0")}`);
 };
 
-// pre-seve for auto increment code
-ReasonSchema.pre("save", function (next) {
-  const doc = this;
-  if (doc.isNew && !doc.code) {
+// pre-save for auto increment code
+ReasonSchema.post("save", function (doc, next) {
+  if (!doc.code) {
     getNextCode("downTimeReasonCode", "BD", 5)
       .then((code) => {
         doc.code = code;
-        next();
+        return doc.save();
       })
+      .then(() => next())
       .catch((err) => next(err));
   } else {
     next();

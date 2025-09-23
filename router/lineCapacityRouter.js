@@ -4,13 +4,22 @@ const Capacity = require("../models/LineCapacity");
 const { mongoose } = require("mongoose");
 const { auth } = require("../middlewares/auth");
 
+// text helper
+const escapeRegex = (text) => {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+};
+
 // Get all capacities
 router.get("/", auth, (req, res) => {
   const userRole = req.userRole;
   const search = req.query.search || "";
+  
   const page = parseInt(req.query.currentPage);
   const size = parseInt(req.query.rowPerPage);
+  const unitId = req.query.unitId;
   let lineIds = req.query.lineIds || [];
+
+  // console.log("Capacity", unitId);
 
   // Ensure array
   if (typeof lineIds === "string") {
@@ -34,6 +43,13 @@ router.get("/", auth, (req, res) => {
       },
     },
     { $unwind: { path: "$line", preserveNullAndEmptyArrays: true } },
+    {
+      $match: {
+        ...(unitId
+          ? { "line.unitId": new mongoose.Types.ObjectId(unitId) }
+          : {}),
+      },
+    },
     {
       $lookup: {
         from: "lineTypes",
@@ -75,20 +91,22 @@ router.get("/", auth, (req, res) => {
         from: "uoms",
         localField: "product.primaryUomId",
         foreignField: "_id",
-        as: "uom",
+        as: "primaryUom",
       },
     },
-    { $unwind: { path: "$uom", preserveNullAndEmptyArrays: true } },
+    { $unwind: { path: "$primaryUom", preserveNullAndEmptyArrays: true } },
   ];
 
   if (search) {
+    const safeSearch = escapeRegex(search);
+
     basePipeline.push({
       $match: {
         $or: [
-          { "line.name": { $regex: search, $options: "i" } },
-          { "product.name": { $regex: search, $options: "i" } },
-          { "unit.name": { $regex: search, $options: "i" } },
-          { "section.name": { $regex: search, $options: "i" } },
+          { "line.name": { $regex: safeSearch, $options: "i" } },
+          { "product.name": { $regex: safeSearch, $options: "i" } },
+          { "unit.name": { $regex: safeSearch, $options: "i" } },
+          { "section.name": { $regex: safeSearch, $options: "i" } },
         ],
       },
     });

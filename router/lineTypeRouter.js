@@ -3,21 +3,32 @@ const router = express.Router();
 const LineType = require("../models/LineType");
 const { auth } = require("../middlewares/auth");
 
+// text helper
+const escapeRegex = (text) => {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+};
+
 // Get all lineTypes
 router.get("/", auth, async (req, res) => {
+  const userRole = req.userRole;
   const search = req.query.search || "";
+  const safeSearch = escapeRegex(search);
   const page = parseInt(req.query.currentPage);
   const size = parseInt(req.query.rowPerPage);
 
   await LineType.find({
-    name: { $regex: search, $options: "i" },
+    ...(userRole === "User" ? { isActive: true } : {}),
+    name: { $regex: safeSearch, $options: "i" },
   })
 
     .populate("createdById")
     .skip(page * size)
     .limit(size)
     .then((data) => {
-      LineType.countDocuments({ name: { $regex: search, $options: "i" } })
+      LineType.countDocuments({
+        ...(userRole === "User" ? { isActive: true } : {}),
+        name: { $regex: safeSearch, $options: "i" },
+      })
         .then((count) => {
           res.status(200).json({ data, totalCount: count });
         })

@@ -4,31 +4,41 @@ const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const { auth } = require("../middlewares/auth");
 
-// sync indexes
-User.syncIndexes();
+  // text helper
+const escapeRegex = (text) => {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+};
+
 
 const defaultPassword = "mis";
 const saltRounds = 10;
 
-
 // Get all users
 router.get("/", auth, async (req, res) => {
+  const userRole = req.userRole;
   const search = req.query.search || "";
+  const safeSearch = escapeRegex(search);
   const page = parseInt(req.query.currentPage);
   const size = parseInt(req.query.rowPerPage);
 
+
   await User.find({
-    name: { $regex: search, $options: "i" },
+    ...(userRole === "User" ? { isActive: true } : {}),
+    name: { $regex: safeSearch, $options: "i" },
   })
     .populate("departmentId")
     .populate("designationId")
     .populate("moduleId")
     .populate("roleId")
     .populate("createdById")
+    .sort({ name: 1, enroll: 1 })
     .skip(page * size)
     .limit(size)
     .then((data) => {
-      User.countDocuments({ name: { $regex: search, $options: "i" } })
+      User.countDocuments({
+        ...(userRole === "User" ? { isActive: true } : {}),
+        name: { $regex: safeSearch, $options: "i" },
+      })
         .then((count) => {
           res.status(200).json({ data, totalCount: count });
         })
@@ -42,8 +52,6 @@ router.get("/", auth, async (req, res) => {
       res.status(404).json({ err, error: "Users not found." });
     });
 });
-
-
 
 // Get one user
 router.get("/:id", auth, async (req, res) => {
@@ -106,7 +114,7 @@ router.patch("/:id", auth, async (req, res) => {
         req.body.password,
         user.password
       );
-      
+
       if (comparePassword) {
         const hashedPassword = await bcrypt.hash(
           req.body.newPassword,
@@ -115,7 +123,6 @@ router.patch("/:id", auth, async (req, res) => {
         updatedData.password = hashedPassword;
         updatedData.isChangedPassword = true;
       } else {
-        
         return res.status(404).json({
           error: "Current password is incorrect.",
         });
@@ -153,7 +160,7 @@ router.patch("/:id/updatePassword", async (req, res) => {
 
   if (comparePassword) {
     const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
-    
+
     const updated = await User.findByIdAndUpdate(
       req.params.id,
       { password: hashedNewPassword, updatedById, isChangedPassword: true },
@@ -172,7 +179,6 @@ router.patch("/:id/updatePassword", async (req, res) => {
         });
       });
   } else {
-    
     res.status(404).json({
       error: "Current password is incorrect.",
     });

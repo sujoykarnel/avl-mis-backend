@@ -4,6 +4,11 @@ const WastageAssignItem = require("../models/WastageAssignItem");
 const { auth } = require("../middlewares/auth");
 const { default: mongoose } = require("mongoose");
 
+// text helper
+const escapeRegex = (text) => {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+};
+
 // Get all wastageAssignItems
 router.get("/", auth, async (req, res) => {
   const userRole = req.userRole;
@@ -89,13 +94,15 @@ router.get("/", auth, async (req, res) => {
   ];
 
   if (search) {
+    const safeSearch = escapeRegex(search);
+
     basePipeline.push({
       $match: {
         $or: [
-          { "unit.name": { $regex: search, $options: "i" } },
-          { "wastageType.name": { $regex: search, $options: "i" } },
-          { "material.name": { $regex: search, $options: "i" } },
-          { "wastageItem.name": { $regex: search, $options: "i" } },
+          { "unit.name": { $regex: safeSearch, $options: "i" } },
+          { "wastageType.name": { $regex: safeSearch, $options: "i" } },
+          { "material.name": { $regex: safeSearch, $options: "i" } },
+          { "wastageItem.name": { $regex: safeSearch, $options: "i" } },
         ],
       },
     });

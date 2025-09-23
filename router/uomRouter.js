@@ -3,20 +3,31 @@ const router = express.Router();
 const Uom = require("../models/Uom");
 const { auth } = require("../middlewares/auth");
 
+// text helper
+const escapeRegex = (text) => {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+};
+
 // Get all uoms
 router.get("/", auth, async (req, res) => {
+  const userRole = req.userRole;
   const search = req.query.search || "";
+  const safeSearch = escapeRegex(search);
   const page = parseInt(req.query.currentPage);
   const size = parseInt(req.query.rowPerPage);
 
   await Uom.find({
-    name: { $regex: search, $options: "i" },
+    ...(userRole === "User" ? { isActive: true } : {}),
+    name: { $regex: safeSearch, $options: "i" },
   })
     .populate()
     .skip(page * size)
     .limit(size)
     .then((data) => {
-      Uom.countDocuments({ name: { $regex: search, $options: "i" } })
+      Uom.countDocuments({
+        ...(userRole === "User" ? { isActive: true } : {}),
+        name: { $regex: safeSearch, $options: "i" },
+      })
         .then((count) => {
           res.status(200).json({ data, totalCount: count });
         })

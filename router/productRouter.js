@@ -3,13 +3,21 @@ const router = express.Router();
 const Product = require("../models/Product");
 const { auth } = require("../middlewares/auth");
 
+// text helper
+const escapeRegex = (text) => {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+};
+
 // Get all products
 router.get("/", auth, (req, res) => {
+  const userRole = req.userRole;
   const search = req.query.search || "";
+  const safeSearch = escapeRegex(search);
   const page = parseInt(req.query.currentPage);
   const size = parseInt(req.query.rowPerPage);
   Product.find({
-    name: { $regex: search, $options: "i" },
+    ...(userRole === "User" ? { isActive: true } : {}),
+    name: { $regex: safeSearch, $options: "i" },
   })
     .populate("primaryUomId")
     .populate("secondaryUomId")
@@ -17,7 +25,10 @@ router.get("/", auth, (req, res) => {
     .skip(page * size)
     .limit(size)
     .then((data) => {
-      Product.countDocuments({ name: { $regex: search, $options: "i" } })
+      Product.countDocuments({
+        ...(userRole === "User" ? { isActive: true } : {}),
+        name: { $regex: safeSearch, $options: "i" },
+      })
         .then((count) => {
           const sendData = { data, totalCount: count };
           res.status(200).json({ data, totalCount: count });

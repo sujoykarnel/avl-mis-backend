@@ -3,20 +3,31 @@ const router = express.Router();
 const Module = require("../models/Module");
 const { auth } = require("../middlewares/auth");
 
+// text helper
+const escapeRegex = (text) => {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+};
+
 // Get all modules
 router.get("/", auth, async (req, res) => {
+  const userRole = req.userRole;
   const search = req.query.search || "";
+  const safeSearch = escapeRegex(search);
   const page = parseInt(req.query.currentPage);
   const size = parseInt(req.query.rowPerPage);
 
   await Module.find({
-    name: { $regex: search, $options: "i" },
+    ...(userRole === "User" ? { isActive: true } : {}),
+    name: { $regex: safeSearch, $options: "i" },
   })
     .populate("createdById")
     .skip(page * size)
     .limit(size)
     .then((data) => {
-      Module.countDocuments({ name: { $regex: search, $options: "i" } })
+      Module.countDocuments({
+        ...(userRole === "User" ? { isActive: true } : {}),
+        name: { $regex: safeSearch, $options: "i" },
+      })
         .then((count) => {
           res.status(200).json({ data, totalCount: count });
         })

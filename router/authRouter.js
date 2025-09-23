@@ -15,7 +15,7 @@ const saltRounds = 10;
 // Login User
 router.post("/login", async (req, res) => {
   const { enroll, password } = req.body;
-  const user = await User.findOne({ enroll })
+  const user = await User.findOne({ isActive: true, enroll })
     .populate("roleId")
     .populate("moduleId")
     .populate("departmentId")
@@ -34,7 +34,7 @@ router.post("/login", async (req, res) => {
             enroll,
             role: roleId?.name,
           };
-          
+
           const token = jwt.sign(userData, process.env.JWT_SECRET, {
             expiresIn: "8h",
           });

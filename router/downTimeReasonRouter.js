@@ -3,11 +3,17 @@ const router = express.Router();
 const DownTimeReason = require("../models/DownTimeReason");
 const { auth } = require("../middlewares/auth");
 
+// text helper
+const escapeRegex = (text) => {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+};
+
 // Get all downTimeReasons
 router.get("/", auth, (req, res) => {
   const userRole = req.userRole;
   const downTimeCategoryId = req.query.downTimeCategoryId || "";
   const search = req.query.search || "";
+  const safeSearch = escapeRegex(search);
   const page = parseInt(req.query.currentPage);
   const size = parseInt(req.query.rowPerPage);
 
@@ -17,14 +23,17 @@ router.get("/", auth, (req, res) => {
     ...(downTimeCategoryId
       ? { downTimeCategoryIds: { $in: [downTimeCategoryId] } }
       : {}),
-    name: { $regex: search, $options: "i" },
+    name: { $regex: safeSearch, $options: "i" },
   })
     .populate("downTimeCategoryIds")
     .skip(page * size)
     .limit(size)
     .sort({ code: 1, name: 1 })
     .then((data) => {
-      DownTimeReason.countDocuments({ name: { $regex: search, $options: "i" } })
+      DownTimeReason.countDocuments({
+        ...(userRole === "User" ? { isActive: true } : {}),
+        name: { $regex: safeSearch, $options: "i" },
+      })
         .then((count) => {
           res.status(200).json({ data, totalCount: count });
         })

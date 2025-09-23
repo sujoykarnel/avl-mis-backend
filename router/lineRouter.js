@@ -3,8 +3,14 @@ const router = express.Router();
 const Line = require("../models/Line");
 const { auth } = require("../middlewares/auth");
 
+// text helper
+const escapeRegex = (text) => {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+};
+
 // Get all lines
 router.get("/", async (req, res) => {
+  const userRole = req.userRole;
   const search = req.query.search || "";
   const page = parseInt(req.query.currentPage);
   const size = parseInt(req.query.rowPerPage);
@@ -48,13 +54,15 @@ router.get("/", async (req, res) => {
   ];
 
   if (search) {
+    const safeSearch = escapeRegex(search);
+    
     basePipeline.push({
       $match: {
         $or: [
-          { name: { $regex: search, $options: "i" } },
-          { "lineType.name": { $regex: search, $options: "i" } },
-          { "unit.name": { $regex: search, $options: "i" } },
-          { "section.name": { $regex: search, $options: "i" } },
+          { name: { $regex: safeSearch, $options: "i" } },
+          { "lineType.name": { $regex: safeSearch, $options: "i" } },
+          { "unit.name": { $regex: safeSearch, $options: "i" } },
+          { "section.name": { $regex: safeSearch, $options: "i" } },
         ],
       },
     });

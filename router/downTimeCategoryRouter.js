@@ -3,28 +3,39 @@ const router = express.Router();
 const DownTimeCategory = require("../models/DownTimeCategory");
 const { auth } = require("../middlewares/auth");
 
+// text helper
+const escapeRegex = (text) => {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+};
+
 // Get all downTimeCategorys
 router.get("/", auth, async (req, res) => {
+  const userRole = req.userRole;
   const search = req.query.search || "";
+  const safeSearch = escapeRegex(search);
   const page = parseInt(req.query.currentPage);
   const size = parseInt(req.query.rowPerPage);
 
   const downTimeCategories = await DownTimeCategory.find({
-    name: { $regex: search, $options: "i" },
+    ...(userRole === "User" ? { isActive: true } : {}),
+    name: { $regex: safeSearch, $options: "i" },
   })
     .populate("createdById")
     .skip(page * size)
     .limit(size)
     .then((data) => {
       DownTimeCategory.countDocuments({
-        name: { $regex: search, $options: "i" },
+        ...(userRole === "User" ? { isActive: true } : {}),
+        name: { $regex: safeSearch, $options: "i" },
       })
         .then((count) => {
           res.status(200).json({ data, totalCount: count });
         })
         .catch((countErr) => {
           console.error(countErr);
-          res.status(500).json({ error: "Failed to count DownTimeCategories." });
+          res
+            .status(500)
+            .json({ error: "Failed to count DownTimeCategories." });
         });
     })
     .catch((err) => {

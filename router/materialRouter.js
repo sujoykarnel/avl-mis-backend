@@ -3,20 +3,35 @@ const router = express.Router();
 const Material = require("../models/Material");
 const { auth } = require("../middlewares/auth");
 
+// text helper
+const escapeRegex = (text) => {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+};
+
 // Get all materials
 router.get("/", async (req, res) => {
+  const userRole = req.userRole;
   const search = req.query.search || "";
+  const safeSearch = escapeRegex(search);
   const page = parseInt(req.query.currentPage);
   const size = parseInt(req.query.rowPerPage);
 
   const materials = await Material.find({
-    name: { $regex: search, $options: "i" },
+    ...(userRole === "User" ? { isActive: true } : {}),
+    name: { $regex: safeSearch, $options: "i" },
   })
-    .populate("uomId")
+    .sort({ name: 1 })
     .skip(page * size)
     .limit(size)
+    .populate({
+      path: "uomId",
+      options: { sort: { name: 1 } },
+    })
     .then((data) => {
-      Material.countDocuments({ name: { $regex: search, $options: "i" } })
+      Material.countDocuments({
+        ...(userRole === "User" ? { isActive: true } : {}),
+        name: { $regex: safeSearch, $options: "i" },
+      })
         .then((count) => {
           const sendData = { data, totalCount: count };
           res.status(200).json({ data, totalCount: count });

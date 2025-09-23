@@ -3,21 +3,31 @@ const router = express.Router();
 const Designation = require("../models/Designation");
 const { auth } = require("../middlewares/auth");
 
+// text helper
+const escapeRegex = (text) => {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+};
+
 // Get all designations
 router.get("/", auth, async (req, res) => {
+  const userRole = req.userRole;
   const search = req.query.search || "";
+  const safeSearch = escapeRegex(search);
   const page = parseInt(req.query.currentPage) || null;
   const size = parseInt(req.query.rowPerPage) || null;
 
   const designation = await Designation.find({
-    name: { $regex: search, $options: "i" },
+    ...(userRole === "User" ? { isActive: true } : {}),
+    name: { $regex: safeSearch, $options: "i" },
   })
     .populate("createdById")
     .skip(page * size)
     .limit(size)
     .then((data) => {
-      
-      Designation.countDocuments({ name: { $regex: search, $options: "i" } })
+      Designation.countDocuments({
+        ...(userRole === "User" ? { isActive: true } : {}),
+        name: { $regex: safeSearch, $options: "i" },
+      })
         .then((count) => {
           res.status(200).json({ data, totalCount: count });
         })
