@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-//  nasted wastage qty schima
+//  nasted of nasted wastage qty schima
 const wastageQtySchema = new mongoose.Schema(
   {
     wastageItemId: {
@@ -90,7 +90,15 @@ const LineLogSchema = new mongoose.Schema(
       ref: "InnerMachine",
       default: null,
     },
-    productionQty: {
+    capacityPerHr: {
+      type: Number,
+      required: true,
+    },
+    primaryProductionQty: {
+      type: Number,
+      required: true,
+    },
+    secondaryProductionQty: {
       type: Number,
       required: true,
     },

@@ -95,6 +95,15 @@ router.get("/", auth, (req, res) => {
       },
     },
     { $unwind: { path: "$primaryUom", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "uoms",
+        localField: "product.secondaryUomId",
+        foreignField: "_id",
+        as: "secondaryUom",
+      },
+    },
+    { $unwind: { path: "$secondaryUom", preserveNullAndEmptyArrays: true } },
   ];
 
   if (search) {
@@ -188,10 +197,10 @@ router.get("/:id", auth, async (req, res) => {
         from: "uoms",
         localField: "product.primaryUomId",
         foreignField: "_id",
-        as: "uom",
+        as: "primaryUom",
       },
     },
-    { $unwind: "$uom" },
+    { $unwind: "$primaryUom" },
   ])
     .then((capacity) => {
       // console.log(capacity);

@@ -55,7 +55,7 @@ router.get("/", async (req, res) => {
 
   if (search) {
     const safeSearch = escapeRegex(search);
-    
+
     basePipeline.push({
       $match: {
         $or: [

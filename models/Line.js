@@ -22,6 +22,14 @@ const LineSchema = new mongoose.Schema(
       ref: "Section",
       required: true,
     },
+    haveCounter: {
+      type: Boolean,
+      default: false,
+    },
+    flexibleSecondaryUom: {
+      type: Boolean,
+      default: false,
+    },
     isActive: {
       type: Boolean,
       default: true,

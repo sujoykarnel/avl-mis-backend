@@ -16,13 +16,15 @@ router.get("/", async (req, res) => {
   const page = parseInt(req.query.currentPage);
   const size = parseInt(req.query.rowPerPage);
   let lineIds = req.query.lineIds || [];
+  const logFrom = new Date(req.query.logFrom);
+  const logTo = new Date(req.query.logTo);
 
   // Ensure array
   if (typeof lineIds === "string") {
     lineIds = lineIds.split(",");
   }
   const objectLineIds = lineIds.map((id) => new mongoose.Types.ObjectId(id));
-  // console.log(objectLineIds);
+  // console.log("lineLogs", logFrom, logTo);
 
   const basePipeline = [
     {
@@ -43,7 +45,11 @@ router.get("/", async (req, res) => {
           },
         ]
       : []),
-
+    {
+      $match: {
+        fromDateTime: { $gte: logFrom, $lte: logTo },
+      },
+    },
     {
       $lookup: {
         from: "lines",
@@ -159,6 +165,7 @@ router.get("/", async (req, res) => {
         "createdBy.password": 0,
       },
     },
+    { $sort: { createdAt: -1 } },
   ];
 
   if (search) {
@@ -186,14 +193,42 @@ router.get("/", async (req, res) => {
 
   const countPipeline = [...basePipeline, { $count: "total" }];
 
+  const lastPipeline = [
+    // first join capacity
+    {
+      $lookup: {
+        from: "lineCapacities",
+        localField: "capacityId",
+        foreignField: "_id",
+        as: "capacity",
+      },
+    },
+    { $unwind: "$capacity" },
+
+    // now filter by lineId
+    ...(objectLineIds.length > 0
+      ? [{ $match: { "capacity.lineId": { $in: objectLineIds } } }]
+      : []),
+
+    { $sort: { createdAt: -1 } },
+    { $limit: 1 },
+
+    // // include other lookups if you want
+    // ...basePipeline.filter(
+    //   (stage) => stage.$lookup && !stage.$lookup.from.includes("lineCapacities")
+    // ),
+  ];
+
   Promise.all([
     LineLog.aggregate(dataPipeline),
     LineLog.aggregate(countPipeline),
+    LineLog.aggregate(lastPipeline),
   ])
-    .then(([data, countArr]) => {
+    .then(([data, countArr, lastLogArr]) => {
       const totalCount = countArr[0]?.total || 0;
-      // console.log(data, totalCount);
-      res.status(200).json({ data, totalCount });
+      const lastLog = lastLogArr[0] || null;
+      // console.log("lineLog", lastLog);
+      res.status(200).json({ data, totalCount, lastLog });
     })
     .catch((err) => {
       console.log(err);
@@ -265,10 +300,19 @@ router.get("/:id", async (req, res) => {
         from: "uoms",
         localField: "product.primaryUomId",
         foreignField: "_id",
-        as: "uom",
+        as: "primaryUom",
       },
     },
-    { $unwind: "$uom" },
+    { $unwind: "$primaryUom" },
+    {
+      $lookup: {
+        from: "uoms",
+        localField: "product.secondaryUomId",
+        foreignField: "_id",
+        as: "secondaryUom",
+      },
+    },
+    { $unwind: "$secondaryUom" },
     {
       $lookup: {
         from: "lineOperations",
