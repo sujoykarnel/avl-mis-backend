@@ -5,11 +5,13 @@ const UserSchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
+      trim: true,
     },
     frNo: {
       type: String,
       required: true,
       unique: true,
+      trim: true,
     },
     enroll: {
       type: Number,
@@ -17,10 +19,12 @@ const UserSchema = new mongoose.Schema(
       min: 1000,
       max: 999999,
       unique: true,
+      trim: true,
     },
     password: {
       type: String,
       required: true,
+      trim: true,
     },
     mobileNo: {
       type: String,

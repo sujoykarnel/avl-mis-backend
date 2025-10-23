@@ -70,6 +70,10 @@ const LineLogSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    resetCounter: {
+      type: Boolean,
+      default: false
+    },
     operationId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "LineOperation",

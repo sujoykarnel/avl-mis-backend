@@ -6,6 +6,7 @@ const UserRoleSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
+      trim: true,
     },
     isActive: {
       type: Boolean,
@@ -21,9 +22,7 @@ const UserRoleSchema = new mongoose.Schema(
       ref: "User",
     },
   },
-  {collection:'userRoles',
-    timestamps: true,
-  }
+  { collection: "userRoles", timestamps: true }
 );
 
 const UserRole = mongoose.model("UserRole", UserRoleSchema);

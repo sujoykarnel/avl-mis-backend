@@ -5,6 +5,7 @@ const MaterialSchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
+      trim: true,
     },
     uomId: {
       type: mongoose.Schema.Types.ObjectId,

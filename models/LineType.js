@@ -6,6 +6,7 @@ const LineTypeSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
+      trim: true,
     },
     isActive: {
       type: Boolean,
