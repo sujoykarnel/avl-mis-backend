@@ -39,7 +39,7 @@ app.use(
     origin: [
       "http://localhost:5173",
       "https://kipms-server.vercel.app",
-      "https://kipms.netlify.app/",
+      "https://kipms.netlify.app",
     ],
     credentials: true,
   })
