@@ -50,6 +50,10 @@ mongoose
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.error("MongoDB error:", err));
 
+app.get("/", (req, res) => {
+  res.json({ message: "API Server Running" });
+});
+
 // Route setup
 app.use("/api/units", unitRouter);
 app.use("/api/sections", sectionRouter);
