@@ -36,7 +36,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:5173", "https://kipms-server.vercel.app"],
     credentials: true,
   })
 );
