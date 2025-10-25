@@ -16,8 +16,8 @@ router.get("/", auth, async (req, res) => {
   const page = parseInt(req.query.currentPage);
   const size = parseInt(req.query.rowPerPage);
   let lineIds = req.query.lineIds || [];
-  const logFrom = new Date(req.query.logFrom);
-  const logTo = new Date(req.query.logTo);
+  const logFrom = req.query.logFrom;
+  const logTo = req.query.logTo;
 
   // Ensure array
   if (typeof lineIds === "string") {
@@ -45,11 +45,15 @@ router.get("/", auth, async (req, res) => {
           },
         ]
       : []),
-    {
-      $match: {
-        fromDateTime: { $gte: logFrom, $lte: logTo },
-      },
-    },
+    ...(logFrom && logTo
+      ? [
+          {
+            $match: {
+              fromDateTime: { $gte: new Date(logFrom), $lte: new Date(logTo) },
+            },
+          },
+        ]
+      : []),
     {
       $lookup: {
         from: "lines",
@@ -194,22 +198,6 @@ router.get("/", auth, async (req, res) => {
   const countPipeline = [...basePipeline, { $count: "total" }];
 
   const lastPipeline = [
-    // // first join capacity
-    // {
-    //   $lookup: {
-    //     from: "lineCapacities",
-    //     localField: "capacityId",
-    //     foreignField: "_id",
-    //     as: "capacity",
-    //   },
-    // },
-    // { $unwind: "$capacity" },
-
-    // // now filter by lineId
-    // ...(objectLineIds.length > 0
-    //   ? [{ $match: { "capacity.lineId": { $in: objectLineIds } } }]
-    //   : []),
-
     ...basePipeline,
     { $sort: { createdAt: -1 } },
     { $limit: 1 },
