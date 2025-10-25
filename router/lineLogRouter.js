@@ -194,22 +194,23 @@ router.get("/", auth, async (req, res) => {
   const countPipeline = [...basePipeline, { $count: "total" }];
 
   const lastPipeline = [
-    // first join capacity
-    {
-      $lookup: {
-        from: "lineCapacities",
-        localField: "capacityId",
-        foreignField: "_id",
-        as: "capacity",
-      },
-    },
-    { $unwind: "$capacity" },
+    // // first join capacity
+    // {
+    //   $lookup: {
+    //     from: "lineCapacities",
+    //     localField: "capacityId",
+    //     foreignField: "_id",
+    //     as: "capacity",
+    //   },
+    // },
+    // { $unwind: "$capacity" },
 
-    // now filter by lineId
-    ...(objectLineIds.length > 0
-      ? [{ $match: { "capacity.lineId": { $in: objectLineIds } } }]
-      : []),
+    // // now filter by lineId
+    // ...(objectLineIds.length > 0
+    //   ? [{ $match: { "capacity.lineId": { $in: objectLineIds } } }]
+    //   : []),
 
+    ...basePipeline,
     { $sort: { createdAt: -1 } },
     { $limit: 1 },
   ];
@@ -221,7 +222,7 @@ router.get("/", auth, async (req, res) => {
   ])
     .then(([data, countArr, lastLogArr]) => {
       const totalCount = countArr[0]?.total || 0;
-      const lastLog = lastLogArr[0] || null;
+      const lastLog = lastLogArr || [];
       // console.log("lineLog", lastLog);
       res.status(200).json({ data, totalCount, lastLog });
     })
