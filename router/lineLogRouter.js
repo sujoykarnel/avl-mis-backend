@@ -10,7 +10,7 @@ const escapeRegex = (text) => {
 };
 
 // Get all lineLogs
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
   const userRole = req.userRole;
   const search = req.query.search || "";
   const page = parseInt(req.query.currentPage);
@@ -212,11 +212,6 @@ router.get("/", async (req, res) => {
 
     { $sort: { createdAt: -1 } },
     { $limit: 1 },
-
-    // // include other lookups if you want
-    // ...basePipeline.filter(
-    //   (stage) => stage.$lookup && !stage.$lookup.from.includes("lineCapacities")
-    // ),
   ];
 
   Promise.all([
@@ -237,7 +232,7 @@ router.get("/", async (req, res) => {
 });
 
 // Get one lineLog
-router.get("/:id", async (req, res) => {
+router.get("/:id", auth, async (req, res) => {
   const id = req.params.id;
   const lineLog = await LineLog.aggregate([
     { $match: { _id: new mongoose.Types.ObjectId(id) } },

@@ -9,7 +9,7 @@ const escapeRegex = (text) => {
 };
 
 // Get all lines
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
   const userRole = req.userRole;
   const search = req.query.search || "";
   const page = parseInt(req.query.currentPage);

@@ -9,7 +9,7 @@ const escapeRegex = (text) => {
 };
 
 // Get all materials
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
   const userRole = req.userRole;
   const search = req.query.search || "";
   const safeSearch = escapeRegex(search);
