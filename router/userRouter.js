@@ -10,7 +10,7 @@ const escapeRegex = (text) => {
 };
 
 
-const defaultPassword = "mis";
+const defaultPassword = "kipms";
 const saltRounds = 10;
 
 // Get all users
